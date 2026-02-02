@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>광고대시보드 이용안내 - 마케팅광장 광고분석 대시보드</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="네이버, 메타, 구글, 스마트스토어, 쿠팡, 광고 분석 기능 안내.">
+    <meta name="keywords" content="스마트스토어광고,쿠팡광고,메타광고,구글광고,엔드로아스계산,마진율계산,광고분석,데이터분석">
+    <meta name="author" content="마케팅광장">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://dashboard.mbizsquare.com/guide">
+
+    <!-- Site Verification -->
+    <meta name="naver-site-verification" content="cc6eb66db82f1cef83861f978e49ca76d7a72caa">
+    <meta name="google-site-verification" content="i3kI5uL7O6tmcojS0WVBql-E5TUPPR1TkZt8Lwe5zyw">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="이용안내 - 마케팅광장 광고분석 대시보드">
+    <meta property="og:description" content="마케팅광장 광고분석 대시보드 사용 방법을 확인하세요.">
+    <meta property="og:url" content="https://dashboard.mbizsquare.com/guide">
+    <meta property="og:site_name" content="마케팅광장">
+    <meta property="og:locale" content="ko_KR">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+    <link rel="apple-touch-icon" href="/static/img/favicon.svg">
+
+    <link rel="stylesheet" href="/static/css/sidebar.css">
+    <link rel="stylesheet" href="/static/css/header.css">
+    <link rel="stylesheet" href="/static/css/ad-banner.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+        }
+
+        .page-header {
+            background: white;
+            padding: 30px 40px;
+            border-bottom: 1px solid #e0e0e0;
+            margin: -24px -24px 30px -24px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a73e8;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #5f6368;
+            font-size: 15px;
+        }
+
+        .guide-container {
+            max-width: 2264px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .guide-section {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .guide-section h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .guide-section h2 .icon {
+            font-size: 32px;
+        }
+
+        .guide-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a73e8;
+            margin: 24px 0 12px;
+        }
+
+        .guide-section p {
+            color: #5f6368;
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .guide-section ul {
+            margin-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        .guide-section li {
+            color: #5f6368;
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 8px;
+        }
+
+        .guide-section li strong {
+            color: #202124;
+        }
+
+        .step-list {
+            counter-reset: step;
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .step-list li {
+            position: relative;
+            padding-left: 50px;
+            margin-bottom: 20px;
+        }
+
+        .step-list li::before {
+            counter-increment: step;
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            background: #1a73e8;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .feature-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #202124;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #e8f0fe 0%, #f0e8fe 100%);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            border-left: 4px solid #1a73e8;
+        }
+
+        .highlight-box h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a73e8;
+            margin-bottom: 8px;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1557b0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f1f3f4;
+            color: #5f6368;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eaed;
+            color: #202124;
+        }
+
+        .divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 32px 0;
+        }
+
+        @media (max-width: 768px) {
+            .guide-section {
+                padding: 20px 16px;
+            }
+
+            .guide-section h2 {
+                font-size: 18px;
+            }
+
+            .guide-section h3 {
+                font-size: 16px;
+            }
+
+            .guide-section p,
+            .guide-section li {
+                font-size: 14px;
+            }
+
+            .step-list li {
+                padding-left: 40px;
+            }
+
+            .step-list li::before {
+                width: 28px;
+                height: 28px;
+                font-size: 12px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .page-header {
+                margin: -16px -16px 20px -16px;
+                padding: 20px 16px;
+            }
+
+            .page-header h1 {
+                font-size: 22px;
+            }
+
+            .page-header p {
+                font-size: 14px;
+            }
+
+            .guide-container {
+                padding: 0;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .guide-section {
+                padding: 16px 12px;
+            }
+
+            .guide-section h2 {
+                font-size: 16px;
+                gap: 8px;
+            }
+
+            .guide-section h2 .icon {
+                font-size: 24px;
+            }
+
+            .highlight-box {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="mobile-toggle" id="mobileToggle" aria-label="메뉴 열기">☰</button>
+
+    <!-- Top Header -->
+    <header class="top-header">
+        <div class="header-left">
+            <h1 class="logo-text"><img src="/static/img/icons/bar-chart.svg" alt="" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;filter:brightness(0) invert(1);">마케팅광장 광고분석</h1>
+            <span class="logo-subtitle">이용안내</span>
+        </div>
+        <div class="header-right">
+            <a href="http://pf.kakao.com/_QIxlTK" target="_blank" class="header-btn active"><img src="/static/img/icons/guide.svg" alt="" style="width:16px;height:16px;vertical-align:middle;filter:brightness(0) invert(1);"> <span class="btn-text">제휴문의</span></a>
+            <a href="https://mbizsquare.com" target="_blank" class="header-btn"><img src="/static/img/icons/dashboard.svg" alt="" style="width:16px;height:16px;vertical-align:middle;filter:brightness(0) invert(1);"> <span class="btn-text">바로가기</span></a>
+            <div class="user-info">
+                <span class="user-nickname"><img src="/static/img/icons/calculator.svg" alt="" style="width:16px;height:16px;vertical-align:middle;"> {{ g.user.userNicknm }}</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h2>메뉴</h2>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="/" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/dashboard.svg" alt=""></span>
+                <span class="label">대시보드</span>
+            </a>
+            <a href="/guide" class="menu-item active">
+                <span class="icon"><img src="/static/img/icons/guide.svg" alt=""></span>
+                <span class="label">이용안내</span>
+            </a>
+            <a href="/ad-dashboard" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/chart.svg" alt=""></span>
+                <span class="label">광고분석</span>
+            </a>
+            <a href="/ad-dashboard/coupang" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/cart.svg" alt=""></span>
+                <span class="label">쿠팡광고분석</span>
+            </a>
+            <a href="/ad-dashboard/profit-simulator" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/calculator.svg" alt=""></span>
+                <span class="label">마진계산기</span>
+            </a>
+            <a href="/ad-dashboard/ad-efficiency" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/target.svg" alt=""></span>
+                <span class="label">손익분기 ROAS</span>
+            </a>
+            <a href="/ad-dashboard/keyword-combiner" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/combine.svg" alt=""></span>
+                <span class="label">키워드 조합기</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1>📘 이용안내</h1>
+            <p>마케팅광장 광고분석 서비스 사용 방법을 안내해 드립니다.</p>
+        </div>
+
+        <div class="guide-container">
+            <!-- 광고분석 섹션 -->
+            <section class="guide-section">
+                <h2><span class="icon">📈</span> 광고분석 (일반+메타) 사용법</h2>
+                <p>네이버, 메타, 구글 등 다양한 광고 플랫폼의 성과 데이터를 업로드하여 통합 분석할 수 있습니다.</p>
+
+                <h3>데이터 업로드 방법</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>템플릿 다운로드</strong>
+                        <p>광고분석 페이지에서 통합 템플릿 또는 플랫폼별 템플릿을 다운로드합니다.</p>
+                    </li>
+                    <li>
+                        <strong>데이터 입력</strong>
+                        <p>템플릿에 맞게 날짜, 캠페인명, 광고유형, 지출액, 노출수, 클릭수, 전환수, 매출액을 입력합니다.</p>
+                    </li>
+                    <li>
+                        <strong>파일 업로드</strong>
+                        <p>작성한 Excel/CSV 파일을 드래그&드롭하거나 클릭하여 업로드합니다.</p>
+                    </li>
+                    <li>
+                        <strong>분석 결과 확인</strong>
+                        <p>자동으로 계산된 ROAS, CTR, CPA 등 핵심 지표와 캠페인별 성과를 확인합니다.</p>
+                    </li>
+                </ol>
+
+                <div class="highlight-box">
+                    <h4>💡 광고유형 구분</h4>
+                    <p>매출형(sales)은 ROAS 기준으로, 잠재고객(lead)은 CPL 기준으로 성과가 정렬됩니다. 각 캠페인의 목표에 맞는 광고유형을 선택하세요.</p>
+                </div>
+
+                <h3>주요 기능</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>📊 핵심 지표 대시보드</h4>
+                        <p>ROAS, CTR, CPA, CVR, 총 지출/매출을 한눈에 확인할 수 있습니다.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📈 일별 트렌드 차트</h4>
+                        <p>날짜별 성과 변화를 차트로 시각화하여 추이를 파악합니다.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🏆 캠페인별 순위</h4>
+                        <p>ROAS 또는 CPL 기준으로 캠페인 성과 순위를 확인합니다.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📥 리포트 내보내기</h4>
+                        <p>분석 결과를 PDF 파일로 다운로드하여 보관하거나 공유합니다.</p>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <a href="/ad-dashboard" class="btn btn-primary">📈 광고분석 시작하기</a>
+                </div>
+            </section>
+
+            <!-- 쿠팡광고분석 섹션 -->
+            <section class="guide-section">
+                <h2><span class="icon">🛒</span> 쿠팡광고분석 사용법</h2>
+                <p>쿠팡 광고 키워드 데이터를 분석하고 제외 키워드를 추천받을 수 있습니다.</p>
+
+                <h3>데이터 업로드 방법</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>쿠팡 광고 보고서 다운로드</strong>
+                        <p>쿠팡 광고 관리자(https://advertising.coupang.com/marketing-reporting/billboard/reports/pa)에서 매출 성장 광고 보고서를 Excel로 다운로드합니다.</p>
+                    </li>
+                    <li>
+                        <strong>파일 업로드</strong>
+                        <p>다운로드한 Excel 파일을 그대로 업로드합니다. 별도의 가공 없이 원본 파일을 사용하세요.</p>
+                    </li>
+                    <li>
+                        <strong>키워드 분석 결과 확인</strong>
+                        <p>키워드별 ROAS, 클릭수, 광고비, 전환수 등을 확인합니다.</p>
+                    </li>
+                    <li>
+                        <strong>제외 키워드 추천 받기</strong>
+                        <p>비효율 키워드를 자동으로 분석하여 제외 추천을 받습니다.</p>
+                    </li>
+                </ol>
+
+                <div class="highlight-box">
+                    <h4>💡 14일 데이터 권장</h4>
+                    <p>쿠팡 광고는 14일 전환 데이터를 사용하는 것이 정확합니다. 1일 데이터만 있는 경우 ROAS가 실제보다 낮게 표시될 수 있습니다.</p>
+                </div>
+
+                <h3>제외 키워드 추천 시스템</h3>
+                <p>AI 기반 스코어링으로 비효율 키워드를 자동 분석합니다. 우선순위별로 분류되며, 최종 제외 여부는 직접 검토 후 결정하세요.</p>
+                <ul>
+                    <li><strong>🔴 즉시 제외</strong> / <strong>🟠 조속히 제외</strong> / <strong>🟡 검토 필요</strong> / <strong>🟢 모니터링</strong></li>
+                </ul>
+
+                <h3>주요 기능</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🔍 키워드 성과 분석</h4>
+                        <p>키워드별 ROAS, 광고비, 전환수를 정렬하여 확인합니다.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🎯 제외 키워드 추천</h4>
+                        <p>AI가 비효율 키워드를 분석하여 제외를 추천합니다.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>💰 낭비 비용 계산</h4>
+                        <p>제외 시 절약 가능한 광고비를 계산해 드립니다.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📋 제외 목록 복사</h4>
+                        <p>추천 키워드를 한 번에 복사하여 쿠팡에 적용합니다.</p>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <a href="/ad-dashboard/coupang" class="btn btn-primary">🛒 쿠팡광고분석 시작하기</a>
+                </div>
+            </section>
+
+            <!-- FAQ 섹션 -->
+            <section class="guide-section">
+                <h2><span class="icon">❓</span> 자주 묻는 질문</h2>
+
+                <h3>Q. 데이터는 어디에 저장되나요?</h3>
+                <p>업로드한 데이터는 브라우저 세션에 임시 저장됩니다. 분석 결과를 저장하려면 PDF로 내보내기하여 보관하세요.</p>
+
+                <div class="divider"></div>
+
+                <h3>Q. 어떤 파일 형식을 지원하나요?</h3>
+                <p>Excel (.xlsx, .xls)과 CSV (.csv) 형식을 지원합니다. 쿠팡 보고서는 원본 Excel 파일을 그대로 사용하세요.</p>
+
+                <div class="divider"></div>
+
+                <h3>Q. ROAS가 0%인 키워드는 모두 제외해야 하나요?</h3>
+                <p>ROAS 0%라도 브랜드 인지도 향상, 신규 고객 유입 등의 목적이 있다면 유지할 수 있습니다. 제외 추천은 참고 자료로 활용하시고, 최종 결정은 마케팅 목표에 따라 판단하세요.</p>
+
+                <div class="divider"></div>
+
+                <h3>Q. 문의사항이 있으면 어떻게 하나요?</h3>
+                <p>마케팅광장 고객센터(상단의 제휴문의) 또는 담당자에게 문의해 주세요.</p>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer style="background: #f8f9fa; border-top: 1px solid #e0e0e0; padding: 12px 20px; margin-top: 40px; font-size: 11px; color: #888; text-align: center; line-height: 1.6;">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <p style="margin: 0 0 4px 0;"><span style="font-weight: 600; color: #555;">에이치코</span> ㅣ 대표: 정동환 ㅣ 사업자등록번호: 280-26-00396 ㅣ 통신판매업: 2023-경기하남-0304</p>
+                <p style="margin: 0 0 4px 0;">경기도 하남시 조정대로 45, F318 ㅣ 대표번호: 1566-3046 ㅣ E-mail: jdhwan227@naver.com</p>
+                <p style="margin: 0; color: #aaa;">© 2025 에이치코. All rights reserved.</p>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        // Active menu item
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.menu-item').forEach(item => {
+            if (item.getAttribute('href') === currentPath) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        // Mobile sidebar toggle
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('active');
+            mobileToggle.textContent = sidebar.classList.contains('open') ? '✕' : '☰';
+        }
+
+        mobileToggle.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        // Close sidebar on menu item click (mobile)
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                    sidebarOverlay.classList.remove('active');
+                    mobileToggle.textContent = '☰';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
