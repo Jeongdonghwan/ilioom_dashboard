@@ -1,9 +1,9 @@
-/* Sidebar Styles - 마케팅광장 광고분석 대시보드 */
+/* Sidebar Styles - 모던 미니멀 */
 
 .sidebar {
-    width: 180px;
-    background: #1b2a41;
-    border-right: 1px solid #e4e4e4;
+    width: 200px;
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
     position: fixed;
     top: 56.5px;
     left: 0;
@@ -11,25 +11,25 @@
     z-index: 50;
     display: flex;
     flex-direction: column;
-    box-shadow: 4px 0 5px 0 rgba(0,0,0,0.1);
 }
 
 .sidebar-header {
-    padding: 18px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    background: #1b2a41;
-    color: white;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    background: #ffffff;
 }
 
 .sidebar-header h2 {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 500;
     margin: 0;
-    color: #fff;
+    color: #9ca3af;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
 .sidebar-menu {
-    padding: 12px 0;
+    padding: 8px 0;
     flex: 1;
     overflow-y: auto;
 }
@@ -37,27 +37,28 @@
 .menu-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    color: #fff;
+    gap: 10px;
+    padding: 10px 16px;
+    color: #6b7280;
     text-decoration: none;
-    transition: background 0.18s, color 0.17s;
-    font-size: 13px;
-    font-weight: 600;
+    transition: all 0.15s ease;
+    font-size: 14px;
+    font-weight: 500;
     border-left: 3px solid transparent;
-    margin: 4px 8px;
-    border-radius: 5px;
+    margin: 2px 8px;
+    border-radius: 6px;
 }
 
 .menu-item:hover {
-    background: rgba(255,255,255,0.1);
-    color: #fff;
+    background: #f9fafb;
+    color: #374151;
 }
 
 .menu-item.active {
-    background: rgba(109,141,200,0.2);
-    color: #fff;
-    border-left-color: #6d8dc8;
+    background: #f3f4f6;
+    color: #111827;
+    font-weight: 600;
+    border-left-color: transparent;
 }
 
 .menu-item .icon {
@@ -72,13 +73,15 @@
 .menu-item .icon img {
     width: 18px;
     height: 18px;
-    filter: brightness(0) invert(1);
-    opacity: 0.9;
+    opacity: 0.5;
 }
 
-.menu-item:hover .icon img,
+.menu-item:hover .icon img {
+    opacity: 0.7;
+}
+
 .menu-item.active .icon img {
-    opacity: 1;
+    opacity: 0.85;
 }
 
 .menu-item .label {
@@ -86,32 +89,32 @@
 }
 
 .main-content {
-    margin-left: 180px;
+    margin-left: 200px;
     margin-top: 56.5px;
     min-height: calc(100vh - 56.5px);
-    background: #f8f8f8;
+    background: #fafafa;
     padding: 24px;
 }
 
-/* Mobile Toggle Button (shown when sidebar is collapsed) */
+/* Mobile Toggle Button */
 .mobile-toggle {
     position: fixed;
     top: 20px;
     left: 20px;
     z-index: 999;
-    background: #1a73e8;
+    background: #111827;
     color: white;
     border: none;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 20px;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
     display: none;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.15s ease;
 }
 
 .sidebar.collapsed ~ .mobile-toggle {
@@ -119,8 +122,7 @@
 }
 
 .mobile-toggle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(26, 115, 232, 0.4);
+    background: #374151;
 }
 
 /* Responsive */
@@ -154,21 +156,21 @@
         width: 36px;
         height: 36px;
         font-size: 18px;
-        background: #1b2a41;
+        background: #111827;
         color: white;
         border: none;
         border-radius: 6px;
         cursor: pointer;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
     }
 
     .mobile-toggle:hover {
-        background: #2a3f5f;
+        background: #374151;
     }
 
-    /* 사이드바 열렸을 때 오버레이 */
+    /* Sidebar overlay */
     .sidebar-overlay {
         display: none;
         position: fixed;
@@ -176,7 +178,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0,0,0,0.5);
+        background: rgba(0,0,0,0.3);
         z-index: 40;
     }
 
@@ -187,7 +189,7 @@
 
 /* Scrollbar styling */
 .sidebar-menu::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
 }
 
 .sidebar-menu::-webkit-scrollbar-track {
@@ -195,10 +197,10 @@
 }
 
 .sidebar-menu::-webkit-scrollbar-thumb {
-    background: #dadce0;
-    border-radius: 3px;
+    background: #e5e7eb;
+    border-radius: 2px;
 }
 
 .sidebar-menu::-webkit-scrollbar-thumb:hover {
-    background: #bdc1c6;
+    background: #d1d5db;
 }

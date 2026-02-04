@@ -34,7 +34,7 @@ def get_db_connection():
             host=current_app.config['DB_HOST'],
             port=current_app.config['DB_PORT'],
             user=current_app.config['DB_USER'],
-            password=current_app.config['DB_PASSWORD'],
+            password=current_app.config['DB_PASSWORD'] or None,
             database=current_app.config['DB_NAME'],
             charset='utf8mb4',
             cursorclass=DictCursor,

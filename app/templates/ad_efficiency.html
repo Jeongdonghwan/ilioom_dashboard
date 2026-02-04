@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>손익분기ROAS계산기 | 엔드로아스 계산기 - 마케팅광장</title>
+    <title>손익분기ROAS계산기 | 엔드로아스 계산기 - 이리움</title>
 
     <!-- SEO Meta Tags -->
     <meta name="description" content="손익분기ROAS자동계산,엔드로아스,엔드로아스계산,마진율계산,쿠팡마진계산기,스마트스토어마진계산기">
     <meta name="keywords" content="손익분기ROAS,엔드로아스,ROAS계산기,광고수익률계산,마진율,광고효율,쿠팡광고,쿠팡마케팅">
-    <meta name="author" content="마케팅광장">
+    <meta name="author" content="이리움">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://dashboard.mbizsquare.com/ad-dashboard/ad-efficiency">
 
@@ -21,7 +21,7 @@
     <meta property="og:title" content="손익분기 ROAS 계산기 | 광고 수익률 분석 및 BEP 진단">
     <meta property="og:description" content="손익분기 ROAS 자동계산. 마진율 기반 최소 광고수익률 산출.">
     <meta property="og:url" content="https://dashboard.mbizsquare.com/ad-dashboard/ad-efficiency">
-    <meta property="og:site_name" content="마케팅광장">
+    <meta property="og:site_name" content="이리움">
     <meta property="og:locale" content="ko_KR">
     <meta property="og:image" content="https://dashboard.mbizsquare.com/static/img/og-image.svg">
     <meta property="og:image:width" content="1200">
@@ -65,7 +65,6 @@
     <!-- CSS -->
     <link rel="stylesheet" href="/static/css/header.css">
     <link rel="stylesheet" href="/static/css/sidebar.css">
-    <link rel="stylesheet" href="/static/css/ad-banner.css">
 
     <style>
         :root {
@@ -683,15 +682,11 @@
     <!-- Top Header -->
     <header class="top-header">
         <div class="header-left">
-            <h1 class="logo-text"><img src="/static/img/icons/bar-chart.svg" alt="" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;filter:brightness(0) invert(1);">마케팅광장 광고분석</h1>
+            <a href="/" style="text-decoration:none;color:inherit;"><h1 class="logo-text"><img src="/static/img/icons/bar-chart.svg" alt="" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;opacity:0.6;">이리움 광고대시보드</h1></a>
             <span class="logo-subtitle">손익분기 ROAS</span>
         </div>
         <div class="header-right">
-            <a href="http://pf.kakao.com/_QIxlTK" target="_blank" class="header-btn"><img src="/static/img/icons/guide.svg" alt="" style="width:16px;height:16px;vertical-align:middle;filter:brightness(0) invert(1);"> <span class="btn-text">제휴문의</span></a>
-            <a href="https://mbizsquare.com" target="_blank" class="header-btn"><img src="/static/img/icons/dashboard.svg" alt="" style="width:16px;height:16px;vertical-align:middle;filter:brightness(0) invert(1);"> <span class="btn-text">바로가기</span></a>
-            <div class="user-info">
-                <span class="user-nickname"><img src="/static/img/icons/calculator.svg" alt="" style="width:16px;height:16px;vertical-align:middle;"> {{ g.user.userNicknm }}</span>
-            </div>
+            <a href="/logout" class="header-btn">로그아웃</a>
         </div>
     </header>
 
@@ -708,10 +703,6 @@
                 <span class="icon"><img src="/static/img/icons/dashboard.svg" alt=""></span>
                 <span class="label">대시보드</span>
             </a>
-            <a href="/guide" class="menu-item">
-                <span class="icon"><img src="/static/img/icons/guide.svg" alt=""></span>
-                <span class="label">이용안내</span>
-            </a>
             <a href="/ad-dashboard" class="menu-item">
                 <span class="icon"><img src="/static/img/icons/chart.svg" alt=""></span>
                 <span class="label">광고분석</span>
@@ -720,17 +711,13 @@
                 <span class="icon"><img src="/static/img/icons/cart.svg" alt=""></span>
                 <span class="label">쿠팡광고분석</span>
             </a>
-            <a href="/ad-dashboard/profit-simulator" class="menu-item">
-                <span class="icon"><img src="/static/img/icons/calculator.svg" alt=""></span>
-                <span class="label">마진계산기</span>
-            </a>
             <a href="/ad-dashboard/ad-efficiency" class="menu-item active">
                 <span class="icon"><img src="/static/img/icons/target.svg" alt=""></span>
                 <span class="label">손익분기 ROAS</span>
             </a>
-            <a href="/ad-dashboard/keyword-combiner" class="menu-item">
-                <span class="icon"><img src="/static/img/icons/combine.svg" alt=""></span>
-                <span class="label">키워드 조합기</span>
+            <a href="/ad-dashboard/data-manager" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/folder.svg" alt=""></span>
+                <span class="label">데이터 관리</span>
             </a>
         </nav>
     </aside>
@@ -1383,7 +1370,5 @@
         }
     </script>
 
-    <!-- 배너 로더 스크립트 -->
-    <script src="/static/js/banner-loader.js"></script>
 </body>
 </html>

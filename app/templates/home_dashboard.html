@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>마케팅광장 광고분석 대시보드 - 무료 광고 성과 분석 도구</title>
+    <title>이리움 광고대시보드 - 무료 광고 성과 분석 도구</title>
 
     <!-- SEO Meta Tags -->
     <meta name="description" content="무료 광고분석 도구,스토어광고,쿠팡광고,네이버광고,메타광고,엔드로아스,키워즈조합,광고데이터분석">
     <meta name="keywords" content="광고분석,ROAS,마진계산기,쿠팡광고,네이버광고,메타광고,무료분석,스마트스토어광고,스토어광고,키워드조합">
-    <meta name="author" content="마케팅광장">
+    <meta name="author" content="이리움">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://dashboard.mbizsquare.com/">
 
@@ -18,10 +18,10 @@
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="마케팅광장 광고분석 대시보드 - 무료 광고 성과 분석 도구">
+    <meta property="og:title" content="이리움 광고대시보드 - 무료 광고 성과 분석 도구">
     <meta property="og:description" content="무료 광고분석 도구. ROAS CTR CPA 자동계산 및 마진 시뮬레이션.">
     <meta property="og:url" content="https://dashboard.mbizsquare.com/">
-    <meta property="og:site_name" content="마케팅광장">
+    <meta property="og:site_name" content="이리움">
     <meta property="og:locale" content="ko_KR">
     <meta property="og:image" content="https://dashboard.mbizsquare.com/static/img/og-image.svg">
     <meta property="og:image:width" content="1200">
@@ -29,7 +29,7 @@
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="마케팅광장 광고분석 대시보드 - 무료 광고 성과 분석 도구">
+    <meta name="twitter:title" content="이리움 광고대시보드 - 무료 광고 성과 분석 도구">
     <meta name="twitter:description" content="무료 광고분석 도구. ROAS CTR CPA 자동계산 및 마진 시뮬레이션.">
     <meta name="twitter:image" content="https://dashboard.mbizsquare.com/static/img/og-image.svg">
 
@@ -38,7 +38,7 @@
     {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "마케팅광장 광고분석 대시보드",
+        "name": "이리움 광고대시보드",
         "url": "https://dashboard.mbizsquare.com",
         "description": "무료 광고분석 도구. 스마트스토어, 쿠팡 광고 ROAS 분석 및 마진 시뮬레이션.",
         "applicationCategory": "BusinessApplication",
@@ -50,7 +50,7 @@
         },
         "provider": {
             "@type": "Organization",
-            "name": "마케팅광장",
+            "name": "이리움",
             "url": "https://mbizsquare.com"
         }
     }
@@ -62,7 +62,6 @@
 
     <link rel="stylesheet" href="/static/css/sidebar.css">
     <link rel="stylesheet" href="/static/css/header.css">
-    <link rel="stylesheet" href="/static/css/ad-banner.css">
     <style>
         * {
             margin: 0;
@@ -75,9 +74,9 @@
         }
 
         body {
-            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f5f7fa;
-            color: #2c3e50;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: #fafafa;
+            color: #111827;
         }
 
         .main-content {
@@ -90,88 +89,87 @@
             margin-top: auto !important;
         }
 
-        .page-header {
-            background: white;
-            padding: 30px 40px;
-            border-bottom: 1px solid #e0e0e0;
-            margin: -24px -24px 30px -24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Section heading */
+        .section-heading {
+            text-align: center;
+            padding: 48px 24px 12px;
         }
 
-        .page-header-left h1 {
-            font-size: 32px;
+        .section-heading h2 {
+            font-size: 24px;
             font-weight: 700;
-            color: #1a73e8;
-            margin-bottom: 10px;
+            color: #111827;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
         }
 
-        .page-header-left p {
-            color: #5f6368;
-            font-size: 16px;
+        .section-heading p {
+            font-size: 15px;
+            color: #6b7280;
+            font-weight: 400;
         }
 
-        .page-header-right {
-            display: flex;
-            gap: 15px;
-        }
-
-        .header-link {
-            padding: 10px 20px;
-            background: #f1f3f4;
-            color: #5f6368;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .header-link:hover {
-            background: #1a73e8;
-            color: white;
-        }
-
+        /* Dashboard grid - 2x2 */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             padding: 0 24px;
-            margin: 16px auto 40px;  /* 상단 마진 추가 - 배너와 적절한 간격 */
+            margin: 24px auto 40px;
+            max-width: 720px;
         }
 
         .dashboard-card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 36px 24px;
             text-decoration: none;
             color: inherit;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            gap: 12px;
+            gap: 16px;
         }
 
         .dashboard-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-            border-color: #1a73e8;
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            border-color: #d1d5db;
         }
 
         .card-icon {
-            width: 56px;
-            height: 56px;
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
         }
 
         .card-icon img {
-            width: 100%;
-            height: 100%;
+            width: 28px;
+            height: 28px;
+        }
+
+        /* Icon backgrounds per card type */
+        .dashboard-card.general .card-icon {
+            background: #EEF2FF;
+        }
+
+        .dashboard-card.coupang .card-icon {
+            background: #FEF2F2;
+        }
+
+        .dashboard-card.efficiency .card-icon {
+            background: #ECFDF5;
+        }
+
+        .dashboard-card.datamanager .card-icon {
+            background: #FFF7ED;
         }
 
         .card-content {
@@ -181,133 +179,82 @@
         .dashboard-card h3 {
             font-size: 16px;
             font-weight: 600;
-            color: #202124;
+            color: #111827;
             margin-bottom: 6px;
         }
 
         .dashboard-card p {
-            color: #5f6368;
-            font-size: 12px;
-            line-height: 1.4;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.5;
             margin: 0;
         }
 
-        .dashboard-card.guide {
-            background: linear-gradient(135deg, #11998e15 0%, #38ef7d15 100%);
-        }
-
-        .dashboard-card.general {
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-        }
-
-        .dashboard-card.coupang {
-            background: linear-gradient(135deg, #f093fb15 0%, #f5576c15 100%);
-        }
-
-        .dashboard-card.products {
-            background: linear-gradient(135deg, #fa709a15 0%, #fee14015 100%);
-        }
-
-        .dashboard-card.profit {
-            background: linear-gradient(135deg, #11998e15 0%, #38ef7d15 100%);
-        }
-
-        .dashboard-card.efficiency {
-            background: linear-gradient(135deg, #4facfe15 0%, #00f2fe15 100%);
-        }
-
-        .dashboard-card.product {
-            background: linear-gradient(135deg, #f093fb15 0%, #f5576c15 100%);
-        }
-
-        .dashboard-card.combiner {
-            background: linear-gradient(135deg, #6366f115 0%, #8b5cf615 100%);
-        }
-
-        .dashboard-card.partner {
-            background: linear-gradient(135deg, #ffecd215 0%, #fcb69f15 100%);
-        }
-
-        /* Responsive - 태블릿 */
+        /* Responsive - tablet */
         @media (max-width: 1200px) {
             .dashboard-grid {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(2, 1fr);
                 gap: 16px;
             }
 
             .dashboard-card {
-                padding: 20px 16px;
-            }
-
-            .card-icon {
-                width: 48px;
-                height: 48px;
-            }
-
-            .dashboard-card h3 {
-                font-size: 14px;
-            }
-
-            .dashboard-card p {
-                font-size: 11px;
+                padding: 28px 20px;
             }
         }
 
-        /* Responsive - 모바일 */
+        /* Responsive - mobile */
         @media (max-width: 768px) {
+            .section-heading {
+                padding: 32px 16px 8px;
+            }
+
+            .section-heading h2 {
+                font-size: 20px;
+            }
+
             .dashboard-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr;
                 padding: 0 16px;
                 gap: 12px;
-                margin: 12px auto 24px;  /* 상단 마진도 조정 */
+                margin: 16px auto 24px;
+                max-width: 400px;
             }
 
             .dashboard-card {
-                padding: 16px 12px;
-                gap: 10px;
+                padding: 24px 20px;
+                flex-direction: row;
+                text-align: left;
+                gap: 16px;
             }
 
             .card-icon {
                 width: 44px;
                 height: 44px;
+                border-radius: 10px;
+            }
+
+            .card-icon img {
+                width: 24px;
+                height: 24px;
             }
 
             .dashboard-card h3 {
-                font-size: 14px;
+                font-size: 15px;
             }
 
             .dashboard-card p {
-                font-size: 11px;
+                font-size: 12px;
             }
         }
 
         @media (max-width: 480px) {
             .dashboard-grid {
-                grid-template-columns: repeat(2, 1fr);
                 padding: 0 12px;
                 gap: 10px;
             }
 
             .dashboard-card {
-                padding: 14px 10px;
-                gap: 8px;
-            }
-
-            .card-icon {
-                width: 36px;
-                height: 36px;
-            }
-
-            .dashboard-card h3 {
-                font-size: 13px;
-            }
-
-            .dashboard-card p {
-                font-size: 10px;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
+                padding: 20px 16px;
             }
         }
     </style>
@@ -319,15 +266,11 @@
     <!-- Top Header -->
     <header class="top-header">
         <div class="header-left">
-            <h1 class="logo-text"><img src="/static/img/icons/bar-chart.svg" alt="" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;filter:brightness(0) invert(1);">마케팅광장 광고분석</h1>
-            <span class="logo-subtitle">마광</span>
+            <a href="/" style="text-decoration:none;color:inherit;"><h1 class="logo-text"><img src="/static/img/icons/bar-chart.svg" alt="" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;opacity:0.6;">이리움 광고대시보드</h1></a>
+            <span class="logo-subtitle">이리움</span>
         </div>
         <div class="header-right">
-            <a href="http://pf.kakao.com/_QIxlTK" target="_blank" class="header-btn"><img src="/static/img/icons/guide.svg" alt="" style="width:16px;height:16px;vertical-align:middle;filter:brightness(0) invert(1);"> <span class="btn-text">제휴문의</span></a>
-            <a href="https://mbizsquare.com" target="_blank" class="header-btn"><img src="/static/img/icons/dashboard.svg" alt="" style="width:16px;height:16px;vertical-align:middle;filter:brightness(0) invert(1);"> <span class="btn-text">바로가기</span></a>
-            <div class="user-info">
-                <span class="user-nickname"><img src="/static/img/icons/calculator.svg" alt="" style="width:16px;height:16px;vertical-align:middle;"> {{ g.user.userNicknm }}</span>
-            </div>
+            <a href="/logout" class="header-btn">로그아웃</a>
         </div>
     </header>
 
@@ -344,10 +287,6 @@
                 <span class="icon"><img src="/static/img/icons/dashboard.svg" alt=""></span>
                 <span class="label">대시보드</span>
             </a>
-            <a href="/guide" class="menu-item">
-                <span class="icon"><img src="/static/img/icons/guide.svg" alt=""></span>
-                <span class="label">이용안내</span>
-            </a>
             <a href="/ad-dashboard" class="menu-item">
                 <span class="icon"><img src="/static/img/icons/chart.svg" alt=""></span>
                 <span class="label">광고분석</span>
@@ -356,39 +295,27 @@
                 <span class="icon"><img src="/static/img/icons/cart.svg" alt=""></span>
                 <span class="label">쿠팡광고분석</span>
             </a>
-            <a href="/ad-dashboard/profit-simulator" class="menu-item">
-                <span class="icon"><img src="/static/img/icons/calculator.svg" alt=""></span>
-                <span class="label">마진계산기</span>
-            </a>
             <a href="/ad-dashboard/ad-efficiency" class="menu-item">
                 <span class="icon"><img src="/static/img/icons/target.svg" alt=""></span>
                 <span class="label">손익분기 ROAS</span>
             </a>
-            <a href="/ad-dashboard/keyword-combiner" class="menu-item">
-                <span class="icon"><img src="/static/img/icons/combine.svg" alt=""></span>
-                <span class="label">키워드 조합기</span>
+            <a href="/ad-dashboard/data-manager" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/folder.svg" alt=""></span>
+                <span class="label">데이터 관리</span>
             </a>
         </nav>
     </aside>
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- 상단 대형 배너 (970x90) -->
-        <div id="homeTopBanner"></div>
-
-        <!-- 그리드 배너 2x4 (200x60 x 8개) -->
-        <div id="homeGridBanners"></div>
+        <!-- Section Heading -->
+        <div class="section-heading">
+            <h2>분석 도구</h2>
+            <p>광고 성과를 측정하고 최적화하세요</p>
+        </div>
 
         <!-- Dashboard Cards -->
         <div class="dashboard-grid">
-            <a href="/guide" class="dashboard-card guide">
-                <div class="card-icon"><img src="/static/img/icons/guide-card.svg" alt="이용안내"></div>
-                <div class="card-content">
-                    <h3>이용안내</h3>
-                    <p>서비스 사용 방법 및 기능 설명을 확인하세요</p>
-                </div>
-            </a>
-
             <a href="/ad-dashboard" class="dashboard-card general">
                 <div class="card-icon"><img src="/static/img/icons/chart-card.svg" alt="광고분석"></div>
                 <div class="card-content">
@@ -405,14 +332,6 @@
                 </div>
             </a>
 
-            <a href="/ad-dashboard/profit-simulator" class="dashboard-card profit">
-                <div class="card-icon"><img src="/static/img/icons/calculator-card.svg" alt="마진계산기"></div>
-                <div class="card-content">
-                    <h3>마진계산기</h3>
-                    <p>상품 판매 전 예상 수익을 미리 계산하세요</p>
-                </div>
-            </a>
-
             <a href="/ad-dashboard/ad-efficiency" class="dashboard-card efficiency">
                 <div class="card-icon"><img src="/static/img/icons/target-card.svg" alt="손익분기 ROAS"></div>
                 <div class="card-content">
@@ -421,42 +340,15 @@
                 </div>
             </a>
 
-            <a href="/ad-dashboard/keyword-combiner" class="dashboard-card combiner">
-                <div class="card-icon"><img src="/static/img/icons/combine-card.svg" alt="키워드 조합기"></div>
+            <a href="/ad-dashboard/data-manager" class="dashboard-card datamanager">
+                <div class="card-icon"><img src="/static/img/icons/folder.svg" alt="데이터 관리"></div>
                 <div class="card-content">
-                    <h3>키워드 조합기</h3>
-                    <p>마케팅 키워드를 조합하여 모든 경우의 수를 생성하세요</p>
-                </div>
-            </a>
-
-            <a href="https://mbizsquare.com/?fbclid=fbclid#/expert" target="_blank" class="dashboard-card product">
-                <div class="card-icon"><img src="/static/img/icons/shopping-card.svg" alt="마케팅상품"></div>
-                <div class="card-content">
-                    <h3>마케팅상품</h3>
-                    <p>마케팅광장의 다양한 마케팅 상품을 확인하세요</p>
-                </div>
-            </a>
-
-            <a href="http://pf.kakao.com/_QIxlTK" target="_blank" class="dashboard-card partner">
-                <div class="card-icon"><img src="/static/img/icons/partner-card.svg" alt="광고제휴문의"></div>
-                <div class="card-content">
-                    <h3>광고제휴문의</h3>
-                    <p>광고 및 제휴 문의는 카카오톡으로 연락주세요</p>
+                    <h3>데이터 관리</h3>
+                    <p>광고 데이터를 누적 저장하고 기간별 종합 성과를 분석하세요</p>
                 </div>
             </a>
         </div>
 
-        <!-- 하단 대형 배너 (728x90) -->
-        <div id="homeBottomBanner"></div>
-
-        <!-- Footer -->
-        <footer style="background: #f8f9fa; border-top: 1px solid #e0e0e0; padding: 12px 20px; margin-top: 40px; font-size: 11px; color: #888; text-align: center; line-height: 1.6;">
-            <div style="max-width: 1200px; margin: 0 auto;">
-                <p style="margin: 0 0 4px 0;"><span style="font-weight: 600; color: #555;">에이치코</span> ㅣ 대표: 정동환 ㅣ 사업자등록번호: 280-26-00396 ㅣ 통신판매업: 2023-경기하남-0304</p>
-                <p style="margin: 0 0 4px 0;">경기도 하남시 조정대로 45, F318 ㅣ 대표번호: 1566-3046 ㅣ E-mail: jdhwan227@naver.com</p>
-                <p style="margin: 0; color: #aaa;">© 2025 에이치코. All rights reserved.</p>
-            </div>
-        </footer>
     </main>
 
     <script>
@@ -496,7 +388,5 @@
         });
     </script>
 
-    <!-- 배너 로더 -->
-    <script src="/static/js/banner-loader.js"></script>
 </body>
 </html>

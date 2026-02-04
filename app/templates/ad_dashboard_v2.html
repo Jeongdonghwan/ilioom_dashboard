@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>광고 ROAS 분석기 | 네이버 메타 구글 광고 성과 분석 - 마케팅광장</title>
+    <title>광고 ROAS 분석기 | 네이버 메타 구글 광고 성과 분석 - 이리움</title>
 
     <!-- SEO Meta Tags -->
     <meta name="description" content="광고데이터분석,네이버검색광고,네이버쇼핑광고,스마트스토어광고,메타광고분석,구글광고,ROAS분석">
     <meta name="keywords" content="광고데이터분석,네이버검색광고,네이버쇼핑광고,스마트스토어광고,ROAS계산기,광고분석,네이버광고,메타광고,광고성과">
-    <meta name="author" content="마케팅광장">
+    <meta name="author" content="이리움">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://dashboard.mbizsquare.com/ad-dashboard">
 
@@ -21,7 +21,7 @@
     <meta property="og:title" content="광고 ROAS 분석기 | 네이버 메타 구글 광고 성과 분석">
     <meta property="og:description" content="네이버 메타 구글 광고 ROAS 무료 분석. CTR CPA 전환율 자동계산.">
     <meta property="og:url" content="https://dashboard.mbizsquare.com/ad-dashboard">
-    <meta property="og:site_name" content="마케팅광장">
+    <meta property="og:site_name" content="이리움">
     <meta property="og:locale" content="ko_KR">
     <meta property="og:image" content="https://dashboard.mbizsquare.com/static/img/og-image.svg">
     <meta property="og:image:width" content="1200">
@@ -73,7 +73,6 @@
     <!-- Sidebar CSS -->
     <link rel="stylesheet" href="/static/css/sidebar.css">
     <link rel="stylesheet" href="/static/css/header.css">
-    <link rel="stylesheet" href="/static/css/ad-banner.css">
 
     <style>
         /* ========================================
@@ -1454,15 +1453,11 @@
     <!-- Top Header -->
     <header class="top-header">
         <div class="header-left">
-            <h1 class="logo-text"><img src="/static/img/icons/bar-chart.svg" alt="" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;filter:brightness(0) invert(1);">마케팅광장 광고분석</h1>
+            <a href="/" style="text-decoration:none;color:inherit;"><h1 class="logo-text"><img src="/static/img/icons/bar-chart.svg" alt="" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;opacity:0.6;">이리움 광고대시보드</h1></a>
             <span class="logo-subtitle">광고분석</span>
         </div>
         <div class="header-right">
-            <a href="http://pf.kakao.com/_QIxlTK" target="_blank" class="header-btn"><img src="/static/img/icons/guide.svg" alt="" style="width:16px;height:16px;vertical-align:middle;filter:brightness(0) invert(1);"> <span class="btn-text">제휴문의</span></a>
-            <a href="https://mbizsquare.com" target="_blank" class="header-btn"><img src="/static/img/icons/dashboard.svg" alt="" style="width:16px;height:16px;vertical-align:middle;filter:brightness(0) invert(1);"> <span class="btn-text">바로가기</span></a>
-            <div class="user-info">
-                <span class="user-nickname"><img src="/static/img/icons/calculator.svg" alt="" style="width:16px;height:16px;vertical-align:middle;"> {{ g.user.userNicknm }}</span>
-            </div>
+            <a href="/logout" class="header-btn">로그아웃</a>
         </div>
     </header>
 
@@ -1479,10 +1474,6 @@
                 <span class="icon"><img src="/static/img/icons/dashboard.svg" alt=""></span>
                 <span class="label">대시보드</span>
             </a>
-            <a href="/guide" class="menu-item">
-                <span class="icon"><img src="/static/img/icons/guide.svg" alt=""></span>
-                <span class="label">이용안내</span>
-            </a>
             <a href="/ad-dashboard" class="menu-item active">
                 <span class="icon"><img src="/static/img/icons/chart.svg" alt=""></span>
                 <span class="label">광고분석</span>
@@ -1491,17 +1482,13 @@
                 <span class="icon"><img src="/static/img/icons/cart.svg" alt=""></span>
                 <span class="label">쿠팡광고분석</span>
             </a>
-            <a href="/ad-dashboard/profit-simulator" class="menu-item">
-                <span class="icon"><img src="/static/img/icons/calculator.svg" alt=""></span>
-                <span class="label">마진계산기</span>
-            </a>
             <a href="/ad-dashboard/ad-efficiency" class="menu-item">
                 <span class="icon"><img src="/static/img/icons/target.svg" alt=""></span>
                 <span class="label">손익분기 ROAS</span>
             </a>
-            <a href="/ad-dashboard/keyword-combiner" class="menu-item">
-                <span class="icon"><img src="/static/img/icons/combine.svg" alt=""></span>
-                <span class="label">키워드 조합기</span>
+            <a href="/ad-dashboard/data-manager" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/folder.svg" alt=""></span>
+                <span class="label">데이터 관리</span>
             </a>
         </nav>
     </aside>
@@ -1579,17 +1566,10 @@
                         </div>
 
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <!-- 저장 버튼 (계정 연동 전까지 숨김)
-                            <button class="btn btn-secondary" onclick="openSaveAnalysisModal()" style="padding: 8px 16px;">
-                                <img src="/static/img/icons/save.svg" alt="" style="width:16px;height:16px;vertical-align:middle;"> 저장
+                            <!-- 누적 저장 버튼 -->
+                            <button class="btn btn-secondary" onclick="saveToServerFromLocalStorage()" style="padding: 8px 16px;">
+                                <img src="/static/img/icons/save.svg" alt="" style="width:16px;height:16px;vertical-align:middle;"> 누적 저장
                             </button>
-                            -->
-
-                            <!-- 불러오기 버튼 (계정 연동 전까지 숨김)
-                            <button class="btn btn-secondary" onclick="openLoadAnalysisModal()" style="padding: 8px 16px;">
-                                <img src="/static/img/icons/folder.svg" alt="" style="width:16px;height:16px;vertical-align:middle;"> 불러오기
-                            </button>
-                            -->
 
                             <!-- PDF 내보내기 버튼 -->
                             <button class="btn btn-secondary" onclick="exportToPDF()" style="padding: 8px 16px;">
@@ -2094,6 +2074,36 @@
 
                 // Reload page to reset UI
                 location.reload();
+            }
+        }
+
+        // 누적 저장: localStorage 데이터를 서버 DB에 저장
+        async function saveToServerFromLocalStorage() {
+            const dailyData = loadFromLocalStorage();
+            if (!dailyData || dailyData.length === 0) {
+                alert('저장할 데이터가 없습니다. 먼저 파일을 업로드하세요.');
+                return;
+            }
+
+            try {
+                const resp = await fetch('/api/ad-analysis/accumulate-json', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        ad_type: 'general',
+                        data: dailyData
+                    })
+                });
+                const result = await resp.json();
+                if (result.success) {
+                    alert('[완료] DB 저장 완료: ' + result.message);
+                } else {
+                    alert('[오류] 저장 실패: ' + (result.error || ''));
+                }
+            } catch (err) {
+                console.error('Server save failed:', err);
+                alert('[오류] 서버 연결 실패: ' + err.message);
             }
         }
 
@@ -4969,7 +4979,5 @@
         });
     </script>
 
-    <!-- 배너 로더 -->
-    <script src="/static/js/banner-loader.js"></script>
 </body>
 </html>

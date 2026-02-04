@@ -17,7 +17,7 @@ import flask
 
 from app.services.ad_analyzer import AdAnalyzer
 from app.services.ai_insights import AIInsights
-from app.utils.db_utils import execute_query, execute_insert, execute_update, DatabaseError
+from app.utils.db_utils import execute_query, execute_insert, execute_update, execute_delete, DatabaseError
 from app.utils.helpers import (
     allowed_file, clean_filename, get_unique_filename,
     create_error_response, create_success_response,
@@ -26,6 +26,7 @@ from app.utils.helpers import (
 
 
 from itsdangerous import URLSafeTimedSerializer
+import bcrypt
 
 logger = logging.getLogger(__name__)
 
@@ -152,59 +153,84 @@ def normalize_columns(df):
 def before_request():
     """
     요청 전 인증 체크
-    
-    - 개발 모드에서는 세션 체크를 건너뜀
-    - 정적 파일 요청도 세션 체크 제외
+    - 세션에 userId가 있으면 통과
+    - 없으면 /login으로 리다이렉트
     """
-    # 정적 파일 및 공개 페이지는 세션 체크 제외
-    if request.path.startswith('/static/') : return None
+    # 정적 파일, 로그인 페이지, 공개 페이지는 인증 제외
+    if request.path.startswith('/static/'): return None
+    if request.path == '/login': return None
+    if request.path == '/logout': return None
     if request.path.startswith('/landing'): return None
+    if request.path == '/health': return None
+    if request.path == '/robots.txt': return None
+    if request.path == '/sitemap.xml': return None
+    if request.path.startswith('/naver'): return None
 
-    # 소셜 미디어 봇이면 홈 페이지 세션 체크 건너뛰기 (OG 메타태그용)
+    # 소셜 미디어 봇이면 세션 체크 건너뛰기 (OG 메타태그용)
     user_agent = request.headers.get('User-Agent', '')
     if request.path == '/' and is_social_bot(user_agent):
-        return None  # index()에서 og_only.html 반환
-
-    # 개발 모드 체크 (DEBUG 모드이거나 FLASK_ENV가 development인 경우)
-    is_debug_mode = current_app.config.get('DEBUG', False)
-    flask_env = current_app.config.get('FLASK_ENV', os.getenv('FLASK_ENV', 'development'))
-    is_development = flask_env == 'development' or is_debug_mode
-    
-    # 개발 모드이면 세션 체크 건너뛰기
-    if is_development:
-        logger.debug(f"[개발 모드] 세션 체크 건너뛰기: {request.path}")
-        g.user = {'userId': 'test', 'userNicknm': 'testNicknm'}
         return None
-    
-    # 운영 모드에서는 세션 체크 수행
-    COOKIE_VALUE = request.cookies.get('mbiz_session')
-    SECRET_KEY = current_app.config.get('SECRET_KEY')
-    SALT = 'cookie-session' # Flask 기본값
 
-    serializer = URLSafeTimedSerializer(
-        secret_key=SECRET_KEY,
-        salt=SALT,
-        serializer=flask.json.tag.TaggedJSONSerializer(),
-        signer_kwargs={'key_derivation': 'hmac', 'digest_method': 'sha1'} 
-    )
+    # 세션 기반 인증 체크
+    if 'userId' in session:
+        g.user = {
+            'userId': session['userId'],
+            'userNicknm': session.get('userNicknm', '')
+        }
+        return None
+
+    # 미인증 → 로그인 페이지로
+    return redirect('/login')
+
+# ========================================
+# 0. 로그인 / 로그아웃
+# ========================================
+
+@ad_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    """로그인 페이지 및 처리"""
+    if request.method == 'GET':
+        # 이미 로그인되어 있으면 메인으로
+        if 'userId' in session:
+            return redirect('/')
+        return render_template('login.html')
+
+    # POST: 로그인 처리
+    user_id = request.form.get('user_id', '').strip()
+    password = request.form.get('password', '').strip()
+
+    if not user_id or not password:
+        return render_template('login.html', error='아이디와 비밀번호를 입력하세요.')
 
     try:
-        data = serializer.loads(COOKIE_VALUE)
-        if 'userId' in data :
-            g.user = data
-            print('g.user: ', g.user)
-        else:
-            g.user = {
-                'userId': '',
-                'name': '',
-                'userNicknm': ''
-            }
-            if request.path == '/' : return None
-            if request.path.startswith('/guide'): return None
-            return redirect('https://mbizsquare.com/#/login')
+        user = execute_query(
+            "SELECT user_id, user_nicknm, password_hash FROM users WHERE user_id = %s",
+            (user_id,), fetch_one=True
+        )
+
+        if not user or not user.get('password_hash'):
+            return render_template('login.html', error='아이디 또는 비밀번호가 올바르지 않습니다.')
+
+        if not bcrypt.checkpw(password.encode('utf-8'), user['password_hash'].encode('utf-8')):
+            return render_template('login.html', error='아이디 또는 비밀번호가 올바르지 않습니다.')
+
+        # 로그인 성공 → 세션 저장
+        session['userId'] = user['user_id']
+        session['userNicknm'] = user.get('user_nicknm', '')
+        logger.info(f"로그인 성공: {user_id}")
+        return redirect('/')
+
     except Exception as e:
-        print("❌ 실패! 정확한 에러 원인:", e)
-        return redirect('https://mbizsquare.com/#/login')
+        logger.error(f"로그인 오류: {e}")
+        return render_template('login.html', error='로그인 처리 중 오류가 발생했습니다.')
+
+
+@ad_bp.route('/logout')
+def logout():
+    """로그아웃 처리"""
+    session.clear()
+    return redirect('/login')
+
 
 # ========================================
 # 1. 메인 페이지 및 인증
@@ -328,24 +354,6 @@ def guide():
         HTML: 이용안내 템플릿
     """
     return render_template('guide.html')
-
-
-@ad_bp.route('/login')
-def login():
-    """
-    로그인 페이지 (JWT 토큰 없이 접근 시)
-    """
-    return render_template('login.html')
-
-
-@ad_bp.route('/logout')
-def logout():
-    """
-    로그아웃 - 메인 프로젝트 로그인 페이지로 리다이렉트
-    """
-    session.clear()
-    logger.info("User logged out")
-    return redirect(current_app.config.get('MAIN_LOGIN_URL', 'https://mbizsquare.com/login'))
 
 
 # ========================================
@@ -1929,6 +1937,619 @@ def download_template(template_type):
         return create_error_response("템플릿 파일을 찾을 수 없습니다", 404)
 
     return send_file(template_path, as_attachment=True, download_name=filename)
+
+
+# ========================================
+# 9. 데이터 관리 페이지 라우트
+# ========================================
+
+@ad_bp.route('/ad-dashboard/data-manager')
+def data_manager():
+    """데이터 관리 페이지 (누적 데이터 업로드/조회/삭제)"""
+    user = get_current_user()
+    return render_template('data_manager.html', user=user)
+
+
+# ========================================
+# 10. 누적 데이터 API
+# ========================================
+
+@ad_bp.route('/api/ad-analysis/accumulate', methods=['POST'])
+def accumulate_data():
+    """
+    파일 업로드 → 누적 데이터풀에 UPSERT
+
+    - 같은 날짜+캠페인+ad_type이면 덮어쓰기
+    - 새 데이터면 추가
+
+    Request:
+        - file: Excel/CSV 파일
+        - ad_type: 'general' 또는 'coupang'
+    """
+    from app.utils.db_utils import get_db_cursor
+    user_id = get_current_user_id()
+
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': '파일이 없습니다'}), 400
+
+    file = request.files['file']
+    ad_type = request.form.get('ad_type', 'general')
+
+    if file.filename == '':
+        return jsonify({'success': False, 'error': '파일명이 비어있습니다'}), 400
+
+    try:
+        import io
+        file_content = file.read()
+
+        if ad_type == 'coupang':
+            # 쿠팡 파일 파싱
+            df = pd.read_excel(io.BytesIO(file_content), engine='openpyxl')
+            logger.info(f'Coupang accumulate: {file.filename}, rows={len(df)}, cols={list(df.columns)}')
+
+            # 매출액 컬럼 선택
+            if '총 전환매출액(14일)' in df.columns:
+                revenue_col = '총 전환매출액(14일)'
+            elif '총 전환매출액(1일)' in df.columns:
+                revenue_col = '총 전환매출액(1일)'
+            else:
+                return jsonify({'success': False, 'error': '매출액 컬럼 없음'}), 400
+
+            # 주문수 컬럼 선택
+            if '총 주문수(14일)' in df.columns:
+                order_col = '총 주문수(14일)'
+            elif '총 주문수(1일)' in df.columns:
+                order_col = '총 주문수(1일)'
+            else:
+                order_col = None
+
+            # 필수 컬럼 확인
+            required = ['노출수', '클릭수', '광고비']
+            missing = [c for c in required if c not in df.columns]
+            if missing:
+                return jsonify({'success': False, 'error': f'필수 컬럼 누락: {missing}'}), 400
+
+            # campaign_name 소스 결정: 캠페인명 > 키워드
+            if '캠페인명' in df.columns:
+                name_col = '캠페인명'
+            elif '키워드' in df.columns:
+                name_col = '키워드'
+            else:
+                return jsonify({'success': False, 'error': '캠페인명 또는 키워드 컬럼이 필요합니다'}), 400
+
+            # 날짜 처리: 파일명에서 추출 시도, 없으면 오늘 날짜
+            upload_date = _extract_date_from_filename(file.filename)
+            if not upload_date:
+                upload_date = pd.Timestamp.now().strftime('%Y-%m-%d')
+
+            # 쿠팡 → 통합 포맷 변환 (캠페인명 기준 합산)
+            rows = []
+            for _, row in df.iterrows():
+                name = str(row.get(name_col, '')).strip()
+                if not name or name == 'nan':
+                    continue
+                rows.append({
+                    'date': upload_date,
+                    'campaign_name': name,
+                    'spend': float(row.get('광고비', 0) or 0),
+                    'impressions': int(row.get('노출수', 0) or 0),
+                    'clicks': int(row.get('클릭수', 0) or 0),
+                    'conversions': int(row.get(order_col, 0) or 0) if order_col else 0,
+                    'revenue': float(row.get(revenue_col, 0) or 0),
+                })
+            df_temp = pd.DataFrame(rows)
+
+            # 같은 캠페인명끼리 합산 (키워드 여러개 → 캠페인 1개로)
+            if len(df_temp) > 0:
+                df_normalized = df_temp.groupby(['date', 'campaign_name']).agg({
+                    'spend': 'sum', 'impressions': 'sum', 'clicks': 'sum',
+                    'conversions': 'sum', 'revenue': 'sum'
+                }).reset_index()
+            else:
+                df_normalized = df_temp
+
+        else:
+            # 일반 광고 파일 파싱
+            if file.filename.endswith('.csv'):
+                df = pd.read_csv(io.BytesIO(file_content))
+            else:
+                xl_file = pd.ExcelFile(io.BytesIO(file_content))
+                if '일별데이터' in xl_file.sheet_names:
+                    df = pd.read_excel(xl_file, sheet_name='일별데이터')
+                elif '광고데이터' in xl_file.sheet_names:
+                    df = pd.read_excel(xl_file, sheet_name='광고데이터')
+                elif '입력양식' in xl_file.sheet_names:
+                    df = pd.read_excel(xl_file, sheet_name='입력양식')
+                else:
+                    df = pd.read_excel(xl_file, sheet_name=0)
+
+            df_normalized = normalize_columns(df)
+
+            required_cols = ['date', 'campaign_name', 'spend', 'clicks', 'conversions', 'revenue']
+            missing_cols = [col for col in required_cols if col not in df_normalized.columns]
+            if missing_cols:
+                kor_missing = [k for k, v in COLUMN_MAPPING.items() if v in missing_cols]
+                return jsonify({'success': False, 'error': f'필수 컬럼 누락: {kor_missing or missing_cols}'}), 400
+
+            if 'impressions' not in df_normalized.columns or df_normalized['impressions'].sum() == 0:
+                df_normalized['impressions'] = (df_normalized['clicks'] * 50).astype(int)
+
+        # UPSERT 실행
+        inserted = 0
+        updated = 0
+
+        with get_db_cursor(commit=True) as cursor:
+            for _, row in df_normalized.iterrows():
+                date_val = str(row.get('date', ''))
+                campaign = str(row.get('campaign_name', '')).strip()
+                if not campaign or campaign == 'nan' or not date_val:
+                    continue
+
+                sql = """
+                    INSERT INTO ad_accumulated_data
+                    (user_id, date, campaign_name, spend, impressions, clicks, conversions, revenue, ad_type)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        spend = VALUES(spend),
+                        impressions = VALUES(impressions),
+                        clicks = VALUES(clicks),
+                        conversions = VALUES(conversions),
+                        revenue = VALUES(revenue),
+                        uploaded_at = CURRENT_TIMESTAMP
+                """
+                cursor.execute(sql, (
+                    user_id,
+                    date_val,
+                    campaign,
+                    float(row.get('spend', 0) or 0),
+                    int(row.get('impressions', 0) or 0),
+                    int(row.get('clicks', 0) or 0),
+                    int(row.get('conversions', 0) or 0),
+                    float(row.get('revenue', 0) or 0),
+                    ad_type
+                ))
+                # rowcount: 1=inserted, 2=updated
+                if cursor.rowcount == 1:
+                    inserted += 1
+                elif cursor.rowcount == 2:
+                    updated += 1
+
+        logger.info(f'Accumulated data: user={user_id}, ad_type={ad_type}, inserted={inserted}, updated={updated}')
+
+        return jsonify({
+            'success': True,
+            'inserted': inserted,
+            'updated': updated,
+            'total': inserted + updated,
+            'message': f'{inserted}건 추가, {updated}건 업데이트'
+        })
+
+    except Exception as e:
+        logger.error(f'Accumulate data failed: {e}')
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': f'처리 중 오류: {str(e)}'}), 500
+
+
+def _extract_date_from_filename(filename):
+    """파일명에서 날짜 추출 (YYYY-MM-DD, YYYYMMDD 등)"""
+    import re
+    # YYYY-MM-DD 패턴
+    m = re.search(r'(\d{4})-(\d{2})-(\d{2})', filename)
+    if m:
+        return f'{m.group(1)}-{m.group(2)}-{m.group(3)}'
+    # YYYYMMDD 패턴
+    m = re.search(r'(\d{4})(\d{2})(\d{2})', filename)
+    if m:
+        return f'{m.group(1)}-{m.group(2)}-{m.group(3)}'
+    return None
+
+
+@ad_bp.route('/api/ad-analysis/accumulate-json', methods=['POST'])
+def accumulate_json_data():
+    """
+    JSON 데이터 직접 수신 → 누적 데이터풀에 UPSERT
+
+    기존 분석 페이지에서 "누적 저장" 버튼 클릭 시 호출.
+    프론트엔드가 이미 파싱한 데이터를 JSON으로 전송.
+
+    Request Body:
+        {
+            "ad_type": "general" 또는 "coupang",
+            "data": [
+                { "date": "2024-11-01", "campaign_name": "...", "spend": 100000, ... },
+                ...
+            ]
+        }
+    """
+    from app.utils.db_utils import get_db_cursor
+    user_id = get_current_user_id()
+
+    try:
+        body = request.get_json()
+        if not body or 'data' not in body:
+            return jsonify({'success': False, 'error': '데이터가 없습니다'}), 400
+
+        ad_type = body.get('ad_type', 'general')
+        rows = body.get('data', [])
+
+        if not rows:
+            return jsonify({'success': False, 'error': '빈 데이터입니다'}), 400
+
+        inserted = 0
+        updated = 0
+
+        with get_db_cursor(commit=True) as cursor:
+            for row in rows:
+                date_val = str(row.get('date', '')).strip()
+                campaign = str(row.get('campaign_name', '')).strip()
+                if not campaign or campaign == 'nan' or not date_val:
+                    continue
+
+                sql = """
+                    INSERT INTO ad_accumulated_data
+                    (user_id, date, campaign_name, spend, impressions, clicks, conversions, revenue, ad_type)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        spend = VALUES(spend),
+                        impressions = VALUES(impressions),
+                        clicks = VALUES(clicks),
+                        conversions = VALUES(conversions),
+                        revenue = VALUES(revenue),
+                        uploaded_at = CURRENT_TIMESTAMP
+                """
+                cursor.execute(sql, (
+                    user_id,
+                    date_val,
+                    campaign,
+                    float(row.get('spend', 0) or 0),
+                    int(row.get('impressions', 0) or 0),
+                    int(row.get('clicks', 0) or 0),
+                    int(row.get('conversions', 0) or 0),
+                    float(row.get('revenue', 0) or 0),
+                    ad_type
+                ))
+                if cursor.rowcount == 1:
+                    inserted += 1
+                elif cursor.rowcount == 2:
+                    updated += 1
+
+        logger.info(f'Accumulate JSON: user={user_id}, ad_type={ad_type}, inserted={inserted}, updated={updated}')
+
+        return jsonify({
+            'success': True,
+            'inserted': inserted,
+            'updated': updated,
+            'total': inserted + updated,
+            'message': f'{inserted}건 추가, {updated}건 업데이트'
+        })
+
+    except Exception as e:
+        logger.error(f'Accumulate JSON failed: {e}')
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': f'저장 중 오류: {str(e)}'}), 500
+
+
+@ad_bp.route('/api/ad-analysis/accumulated')
+def get_accumulated_data():
+    """
+    누적 데이터 조회 (날짜 범위 + 유형 필터)
+
+    Query Params:
+        - start_date: YYYY-MM-DD
+        - end_date: YYYY-MM-DD
+        - ad_type: 'general', 'coupang', 'all' (기본: all)
+    """
+    user_id = get_current_user_id()
+    start_date = request.args.get('start_date', '')
+    end_date = request.args.get('end_date', '')
+    ad_type = request.args.get('ad_type', 'all')
+
+    try:
+        # 기본 쿼리
+        sql = """
+            SELECT date, campaign_name, spend, impressions, clicks, conversions, revenue, ad_type
+            FROM ad_accumulated_data
+            WHERE user_id = %s
+        """
+        params = [user_id]
+
+        if start_date:
+            sql += " AND date >= %s"
+            params.append(start_date)
+        if end_date:
+            sql += " AND date <= %s"
+            params.append(end_date)
+        if ad_type and ad_type != 'all':
+            sql += " AND ad_type = %s"
+            params.append(ad_type)
+
+        sql += " ORDER BY date ASC, campaign_name ASC"
+
+        rows = execute_query(sql, tuple(params))
+
+        if not rows:
+            return jsonify({
+                'success': True,
+                'data': [],
+                'kpi': {},
+                'daily_trend': [],
+                'campaigns': []
+            })
+
+        df = pd.DataFrame(rows)
+
+        # Decimal → float 변환 (MariaDB의 DECIMAL 타입 호환)
+        for col in ['spend', 'revenue']:
+            df[col] = df[col].astype(float)
+        for col in ['impressions', 'clicks', 'conversions']:
+            df[col] = df[col].astype(int)
+
+        # KPI 계산
+        total_spend = float(df['spend'].sum())
+        total_revenue = float(df['revenue'].sum())
+        total_clicks = int(df['clicks'].sum())
+        total_conversions = int(df['conversions'].sum())
+        total_impressions = int(df['impressions'].sum())
+
+        kpi = {
+            'total_spend': total_spend,
+            'total_revenue': total_revenue,
+            'total_clicks': total_clicks,
+            'total_conversions': total_conversions,
+            'total_impressions': total_impressions,
+            'roas': round(total_revenue / total_spend, 2) if total_spend > 0 else 0,
+            'ctr': round(total_clicks / total_impressions * 100, 2) if total_impressions > 0 else 0,
+            'cpa': round(total_spend / total_conversions, 0) if total_conversions > 0 else 0,
+            'cvr': round(total_conversions / total_clicks * 100, 2) if total_clicks > 0 else 0,
+        }
+
+        # 일별 트렌드
+        daily = df.groupby('date').agg({
+            'spend': 'sum', 'revenue': 'sum', 'clicks': 'sum',
+            'conversions': 'sum', 'impressions': 'sum'
+        }).reset_index()
+        daily['roas'] = (daily['revenue'] / daily['spend']).replace([np.inf, -np.inf], 0).fillna(0).round(2)
+        daily['ctr'] = (daily['clicks'] / daily['impressions'] * 100).replace([np.inf, -np.inf], 0).fillna(0).round(2)
+        daily['cvr'] = (daily['conversions'] / daily['clicks'] * 100).replace([np.inf, -np.inf], 0).fillna(0).round(2)
+        daily['date'] = daily['date'].astype(str)
+        for col in ['spend', 'revenue', 'roas', 'ctr', 'cvr']:
+            daily[col] = daily[col].astype(float)
+        for col in ['clicks', 'conversions', 'impressions']:
+            daily[col] = daily[col].astype(int)
+        daily_trend = daily.to_dict('records')
+
+        # 캠페인별 합산
+        camp = df.groupby('campaign_name').agg({
+            'spend': 'sum', 'revenue': 'sum', 'clicks': 'sum',
+            'conversions': 'sum', 'impressions': 'sum'
+        }).reset_index()
+        camp['roas'] = (camp['revenue'] / camp['spend']).replace([np.inf, -np.inf], 0).fillna(0).round(2)
+        camp['ctr'] = (camp['clicks'] / camp['impressions'] * 100).replace([np.inf, -np.inf], 0).fillna(0).round(2)
+        camp['cpa'] = (camp['spend'] / camp['conversions']).replace([np.inf, -np.inf], 0).fillna(0).round(0)
+        camp['cpc'] = (camp['spend'] / camp['clicks']).replace([np.inf, -np.inf], 0).fillna(0).round(0)
+        camp['cvr'] = (camp['conversions'] / camp['clicks'] * 100).replace([np.inf, -np.inf], 0).fillna(0).round(2)
+        camp = camp.sort_values('spend', ascending=False)
+        for col in ['spend', 'revenue', 'roas', 'ctr', 'cpa', 'cpc', 'cvr']:
+            camp[col] = camp[col].astype(float)
+        for col in ['clicks', 'conversions', 'impressions']:
+            camp[col] = camp[col].astype(int)
+        campaigns = camp.to_dict('records')
+
+        # 원본 데이터 (date를 문자열로)
+        df['date'] = df['date'].astype(str)
+
+        return jsonify({
+            'success': True,
+            'data': df.to_dict('records'),
+            'kpi': kpi,
+            'daily_trend': daily_trend,
+            'campaigns': campaigns
+        })
+
+    except Exception as e:
+        logger.error(f'Get accumulated data failed: {e}')
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@ad_bp.route('/api/ad-analysis/accumulated/dates')
+def get_accumulated_dates():
+    """
+    누적 데이터가 있는 날짜 목록 반환
+
+    Query Params:
+        - ad_type: 'general', 'coupang', 'all' (기본: all)
+    """
+    user_id = get_current_user_id()
+    ad_type = request.args.get('ad_type', 'all')
+
+    try:
+        sql = """
+            SELECT date, ad_type, COUNT(*) as count, SUM(spend) as total_spend
+            FROM ad_accumulated_data
+            WHERE user_id = %s
+        """
+        params = [user_id]
+
+        if ad_type and ad_type != 'all':
+            sql += " AND ad_type = %s"
+            params.append(ad_type)
+
+        sql += " GROUP BY date, ad_type ORDER BY date DESC"
+
+        rows = execute_query(sql, tuple(params))
+
+        # 날짜별로 정리
+        dates = []
+        for row in rows:
+            dates.append({
+                'date': str(row['date']),
+                'ad_type': row['ad_type'],
+                'count': row['count'],
+                'total_spend': float(row['total_spend'])
+            })
+
+        return jsonify({'success': True, 'dates': dates})
+
+    except Exception as e:
+        logger.error(f'Get accumulated dates failed: {e}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@ad_bp.route('/api/ad-analysis/accumulated', methods=['DELETE'])
+def delete_accumulated_data():
+    """
+    누적 데이터 삭제
+
+    Query Params:
+        - date: 특정 날짜 삭제 (YYYY-MM-DD)
+        - start_date + end_date: 기간 삭제
+        - ad_type: 'general', 'coupang', 'all' (기본: all)
+    """
+    from app.utils.db_utils import execute_delete
+    user_id = get_current_user_id()
+    date = request.args.get('date', '')
+    start_date = request.args.get('start_date', '')
+    end_date = request.args.get('end_date', '')
+    ad_type = request.args.get('ad_type', 'all')
+
+    try:
+        sql = "DELETE FROM ad_accumulated_data WHERE user_id = %s"
+        params = [user_id]
+
+        if date:
+            sql += " AND date = %s"
+            params.append(date)
+        elif start_date and end_date:
+            sql += " AND date >= %s AND date <= %s"
+            params.append(start_date)
+            params.append(end_date)
+        else:
+            return jsonify({'success': False, 'error': '삭제할 날짜를 지정하세요'}), 400
+
+        if ad_type and ad_type != 'all':
+            sql += " AND ad_type = %s"
+            params.append(ad_type)
+
+        deleted = execute_delete(sql, tuple(params))
+
+        return jsonify({
+            'success': True,
+            'deleted': deleted,
+            'message': f'{deleted}건 삭제 완료'
+        })
+
+    except Exception as e:
+        logger.error(f'Delete accumulated data failed: {e}')
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@ad_bp.route('/api/ad-analysis/accumulated/compare')
+def compare_accumulated_data():
+    """
+    기간 비교 API — 현재 기간 vs 이전 기간 KPI 비교
+
+    Query Params:
+        - start_date, end_date: 현재 기간
+        - compare_start, compare_end: 비교 기간
+        - ad_type: 'general', 'coupang', 'all'
+    """
+    user_id = get_current_user_id()
+    start_date = request.args.get('start_date', '')
+    end_date = request.args.get('end_date', '')
+    compare_start = request.args.get('compare_start', '')
+    compare_end = request.args.get('compare_end', '')
+    ad_type = request.args.get('ad_type', 'all')
+
+    if not all([start_date, end_date, compare_start, compare_end]):
+        return jsonify({'success': False, 'error': '기간 파라미터가 필요합니다'}), 400
+
+    try:
+        def fetch_kpi(s_date, e_date):
+            sql = """
+                SELECT spend, impressions, clicks, conversions, revenue
+                FROM ad_accumulated_data
+                WHERE user_id = %s AND date >= %s AND date <= %s
+            """
+            params = [user_id, s_date, e_date]
+            if ad_type and ad_type != 'all':
+                sql += " AND ad_type = %s"
+                params.append(ad_type)
+
+            rows = execute_query(sql, tuple(params))
+            if not rows:
+                return {
+                    'total_spend': 0, 'total_revenue': 0, 'total_clicks': 0,
+                    'total_conversions': 0, 'total_impressions': 0,
+                    'roas': 0, 'ctr': 0, 'cpa': 0, 'cvr': 0, 'cpc': 0
+                }
+
+            df = pd.DataFrame(rows)
+            for col in ['spend', 'revenue']:
+                df[col] = df[col].astype(float)
+            for col in ['impressions', 'clicks', 'conversions']:
+                df[col] = df[col].astype(int)
+
+            ts = float(df['spend'].sum())
+            tr = float(df['revenue'].sum())
+            tc = int(df['clicks'].sum())
+            tv = int(df['conversions'].sum())
+            ti = int(df['impressions'].sum())
+
+            return {
+                'total_spend': ts,
+                'total_revenue': tr,
+                'total_clicks': tc,
+                'total_conversions': tv,
+                'total_impressions': ti,
+                'roas': round(tr / ts, 2) if ts > 0 else 0,
+                'ctr': round(tc / ti * 100, 2) if ti > 0 else 0,
+                'cpa': round(ts / tv, 0) if tv > 0 else 0,
+                'cvr': round(tv / tc * 100, 2) if tc > 0 else 0,
+                'cpc': round(ts / tc, 0) if tc > 0 else 0,
+            }
+
+        current = fetch_kpi(start_date, end_date)
+        previous = fetch_kpi(compare_start, compare_end)
+
+        # 변화율 계산
+        changes = {}
+        for key in ['roas', 'ctr', 'cpa', 'cvr', 'cpc', 'total_spend', 'total_revenue']:
+            cur_val = current[key]
+            prev_val = previous[key]
+            if prev_val > 0:
+                change_pct = round((cur_val - prev_val) / prev_val * 100, 1)
+            else:
+                change_pct = 0
+
+            # CPA, CPC는 낮을수록 좋음
+            if key in ['cpa', 'cpc']:
+                trend = 'up' if change_pct < 0 else ('down' if change_pct > 0 else 'flat')
+            else:
+                trend = 'up' if change_pct > 0 else ('down' if change_pct < 0 else 'flat')
+
+            changes[key] = {
+                'current': cur_val,
+                'previous': prev_val,
+                'change_pct': change_pct,
+                'trend': trend
+            }
+
+        return jsonify({
+            'success': True,
+            'current': current,
+            'previous': previous,
+            'changes': changes
+        })
+
+    except Exception as e:
+        logger.error(f'Compare accumulated data failed: {e}')
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 # ========================================

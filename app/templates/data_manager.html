@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>데이터 관리 - 이리움 광고대시보드</title>
+
+    <meta name="description" content="광고 데이터 누적 저장 및 종합 분석">
+    <meta name="author" content="이리움">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+    <link rel="apple-touch-icon" href="/static/img/favicon.svg">
+
+    <link rel="stylesheet" href="/static/css/sidebar.css">
+    <link rel="stylesheet" href="/static/css/header.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: #fafafa;
+            color: #111827;
+        }
+
+        .main-content > .page-wrap {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .main-content > footer { margin-top: auto !important; }
+        .main-content { display: flex; flex-direction: column; min-height: calc(100vh - 60px); }
+
+        /* Section heading */
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+        }
+
+        /* Card sections */
+        .section-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .section-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-card h3 img {
+            width: 18px; height: 18px; opacity: 0.5;
+        }
+
+        /* Upload area */
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 10px;
+            padding: 32px;
+            text-align: center;
+            background: #f9fafb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #6366f1;
+            background: #eef2ff;
+        }
+
+        .upload-area.dragging {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .upload-area p.main-text {
+            font-size: 15px; font-weight: 500; color: #374151; margin-bottom: 4px;
+        }
+
+        .upload-area p.sub-text {
+            font-size: 13px; color: #9ca3af;
+        }
+
+        /* Type selector */
+        .type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 10px 16px;
+            background: #f3f4f6;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease;
+        }
+
+        .type-btn:hover { background: #e5e7eb; }
+
+        .type-btn.active {
+            background: #eef2ff;
+            border-color: #6366f1;
+            color: #4338ca;
+        }
+
+        .type-btn.active.coupang {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #dc2626;
+        }
+
+        /* Upload result */
+        .upload-result {
+            display: none;
+            margin-top: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .upload-result.success {
+            display: block;
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .upload-result.error {
+            display: block;
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        /* Date range controls */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .filter-bar label {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .filter-bar input[type="date"],
+        .filter-bar select {
+            padding: 7px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #374151;
+            background: #fff;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+        .btn-primary:hover { background: #4338ca; }
+
+        .btn-outline {
+            background: #fff;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        .btn-outline:hover { background: #f3f4f6; }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover { background: #dc2626; }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        /* KPI cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .kpi-card .kpi-label {
+            font-size: 12px; color: #9ca3af; font-weight: 500; margin-bottom: 4px;
+        }
+
+        .kpi-card .kpi-value {
+            font-size: 22px; font-weight: 700; color: #111827;
+        }
+
+        /* Chart */
+        .chart-container {
+            position: relative;
+            height: 280px;
+            margin: 16px 0;
+        }
+
+        /* Performance summary */
+        .perf-summary {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+
+        .perf-summary h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 10px;
+        }
+
+        .perf-summary ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .perf-summary li {
+            font-size: 13px;
+            line-height: 1.8;
+            color: #475569;
+        }
+
+        /* Period comparison */
+        .compare-section {
+            background: #fefce8;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+
+        .compare-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 12px;
+        }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .compare-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px 12px;
+            text-align: center;
+        }
+
+        .compare-card .compare-label {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-bottom: 2px;
+        }
+
+        .compare-card .compare-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .compare-card .compare-change {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .compare-card .compare-change.up { color: #059669; }
+        .compare-card .compare-change.down { color: #dc2626; }
+        .compare-card .compare-change.flat { color: #9ca3af; }
+
+        /* Sort buttons */
+        .sort-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .sort-btn {
+            padding: 4px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            background: #fff;
+            font-size: 12px;
+            color: #6b7280;
+            cursor: pointer;
+        }
+
+        .sort-btn.active {
+            background: #4f46e5;
+            color: #fff;
+            border-color: #4f46e5;
+        }
+
+        /* Grade badge */
+        .grade-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .grade-badge.excellent { background: #dcfce7; color: #166534; }
+        .grade-badge.warning { background: #ffedd5; color: #9a3412; }
+        .grade-badge.good { background: #fef9c3; color: #854d0e; }
+        .grade-badge.poor { background: #fee2e2; color: #991b1b; }
+
+        /* Campaign filter */
+        .campaign-filter-section {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+        }
+        .campaign-filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .campaign-filter-header h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin: 0;
+        }
+        .campaign-filter-controls {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .filter-badge {
+            font-size: 11px;
+            font-weight: 600;
+            color: #4f46e5;
+            background: #eef2ff;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .btn-sm {
+            padding: 3px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+        }
+        .campaign-checkbox-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .campaign-checkbox-grid.collapsed { display: none; }
+        .campaign-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #374151;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s;
+        }
+        .campaign-checkbox-item:hover { border-color: #6366f1; background: #eef2ff; }
+        .campaign-checkbox-item.checked { background: #eef2ff; border-color: #6366f1; color: #4338ca; }
+        .campaign-checkbox-item input[type="checkbox"] { accent-color: #4f46e5; cursor: pointer; }
+        @media (max-width: 768px) {
+            .campaign-filter-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+            .campaign-filter-controls { flex-wrap: wrap; }
+        }
+
+        /* Campaign table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            background: #f9fafb;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #6b7280;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .data-table th:hover {
+            background: #f3f4f6;
+        }
+
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #374151;
+        }
+
+        .data-table tr:hover td { background: #f9fafb; }
+
+        .data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+        /* Date list */
+        .date-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .date-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .date-item .date-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .date-item .date-label { font-weight: 600; color: #111827; }
+        .date-item .date-meta { color: #9ca3af; }
+
+        .type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .type-badge.general { background: #eef2ff; color: #4338ca; }
+        .type-badge.coupang { background: #fef2f2; color: #dc2626; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
+
+        .empty-state p { font-size: 14px; }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .loading-spinner.active { display: block; }
+
+        .spinner {
+            width: 28px; height: 28px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin: 0 auto 8px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Tabs */
+        .tab-nav {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 20px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .tab-nav button {
+            flex: 1;
+            padding: 9px 16px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .tab-nav button.active {
+            background: #ffffff;
+            color: #111827;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .type-selector { flex-direction: column; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .filter-bar input[type="date"] { width: 100%; }
+            .date-item { flex-direction: column; gap: 8px; align-items: flex-start; }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .kpi-card .kpi-value { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="mobile-toggle" id="mobileToggle" aria-label="메뉴 열기">☰</button>
+
+    <!-- Top Header -->
+    <header class="top-header">
+        <div class="header-left">
+            <a href="/" style="text-decoration:none;color:inherit;"><h1 class="logo-text"><img src="/static/img/icons/bar-chart.svg" alt="" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;opacity:0.6;">이리움 광고대시보드</h1></a>
+            <span class="logo-subtitle">이리움</span>
+        </div>
+        <div class="header-right">
+            <a href="/logout" class="header-btn">로그아웃</a>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h2>메뉴</h2>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="/" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/dashboard.svg" alt=""></span>
+                <span class="label">대시보드</span>
+            </a>
+            <a href="/ad-dashboard" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/chart.svg" alt=""></span>
+                <span class="label">광고분석</span>
+            </a>
+            <a href="/ad-dashboard/coupang" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/cart.svg" alt=""></span>
+                <span class="label">쿠팡광고분석</span>
+            </a>
+            <a href="/ad-dashboard/ad-efficiency" class="menu-item">
+                <span class="icon"><img src="/static/img/icons/target.svg" alt=""></span>
+                <span class="label">손익분기 ROAS</span>
+            </a>
+            <a href="/ad-dashboard/data-manager" class="menu-item active">
+                <span class="icon"><img src="/static/img/icons/folder.svg" alt=""></span>
+                <span class="label">데이터 관리</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-wrap">
+            <h1 class="page-title">데이터 관리</h1>
+
+            <!-- Tabs -->
+            <div class="tab-nav">
+                <button class="active" data-tab="upload">업로드</button>
+                <button data-tab="dashboard">종합 대시보드</button>
+                <button data-tab="manage">저장 현황</button>
+            </div>
+
+            <!-- Tab 1: Upload -->
+            <div id="tab-upload" class="tab-content active">
+                <div class="section-card">
+                    <h3><img src="/static/img/icons/upload.svg" alt="">데이터 업로드</h3>
+
+                    <div class="type-selector">
+                        <button class="type-btn active" data-type="general" onclick="selectType('general')">일반 광고</button>
+                        <button class="type-btn" data-type="coupang" onclick="selectType('coupang')">쿠팡 광고</button>
+                    </div>
+
+                    <div class="upload-area" id="uploadArea">
+                        <p class="main-text">Excel/CSV 파일을 드래그하거나 클릭하세요</p>
+                        <p class="sub-text">지원: .xlsx, .xls, .csv</p>
+                        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+                    </div>
+
+                    <div class="loading-spinner" id="uploadLoading">
+                        <div class="spinner"></div>
+                        <p style="font-size:13px;color:#6b7280;">업로드 중...</p>
+                    </div>
+
+                    <div id="uploadResult" class="upload-result"></div>
+                </div>
+
+                <div class="section-card" style="background:#f9fafb;">
+                    <p style="font-size:13px;color:#6b7280;line-height:1.6;">
+                        <strong>일반 광고:</strong> 날짜, 캠페인명, 지출액, 클릭수, 전환수, 매출액 컬럼 필요<br>
+                        <strong>쿠팡 광고:</strong> 쿠팡 광고 보고서 그대로 업로드 (키워드, 광고비, 클릭수 등)<br>
+                        같은 날짜+캠페인 데이터를 다시 올리면 자동으로 업데이트됩니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tab 2: Dashboard -->
+            <div id="tab-dashboard" class="tab-content">
+                <div class="section-card">
+                    <h3><img src="/static/img/icons/chart.svg" alt="">종합 분석</h3>
+
+                    <div class="filter-bar">
+                        <label>기간:</label>
+                        <input type="date" id="startDate">
+                        <span style="color:#9ca3af;">~</span>
+                        <input type="date" id="endDate">
+                        <select id="filterType">
+                            <option value="all">전체</option>
+                            <option value="general">일반 광고</option>
+                            <option value="coupang">쿠팡 광고</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="loadDashboard()">조회</button>
+                        <button class="btn btn-outline" onclick="toggleCompare()" id="compareBtn">이전 기간 비교</button>
+                    </div>
+
+                    <div class="loading-spinner" id="dashLoading">
+                        <div class="spinner"></div>
+                        <p style="font-size:13px;color:#6b7280;">불러오는 중...</p>
+                    </div>
+
+                    <div id="dashContent" style="display:none;">
+                        <!-- Campaign Filter -->
+                        <div id="campaignFilterSection" class="campaign-filter-section" style="display:none;">
+                            <div class="campaign-filter-header">
+                                <h4>캠페인 필터</h4>
+                                <div class="campaign-filter-controls">
+                                    <span id="filterBadge" class="filter-badge"></span>
+                                    <button class="btn btn-outline btn-sm" onclick="toggleAllCampaigns(true)">전체 선택</button>
+                                    <button class="btn btn-outline btn-sm" onclick="toggleAllCampaigns(false)">전체 해제</button>
+                                    <button class="btn btn-outline btn-sm" id="filterToggleBtn" onclick="toggleFilterCollapse()">접기</button>
+                                </div>
+                            </div>
+                            <div id="campaignCheckboxes" class="campaign-checkbox-grid"></div>
+                        </div>
+
+                        <!-- KPI -->
+                        <div class="kpi-grid" id="kpiGrid"></div>
+
+                        <!-- Period Comparison -->
+                        <div id="compareSection" class="compare-section" style="display:none;">
+                            <h4>기간 비교</h4>
+                            <div class="compare-grid" id="compareGrid"></div>
+                        </div>
+
+                        <!-- Performance Summary -->
+                        <div class="perf-summary" id="perfSummary" style="display:none;">
+                            <h4>성과 요약</h4>
+                            <ul id="perfSummaryList"></ul>
+                        </div>
+
+                        <!-- Chart: Spend/Revenue/ROAS -->
+                        <div class="chart-container">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+
+                        <!-- Chart: CTR/CVR -->
+                        <div class="chart-container" style="height:220px;">
+                            <canvas id="ctrChart"></canvas>
+                        </div>
+
+                        <!-- Campaign table -->
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin:20px 0 10px;">
+                            <h4 style="font-size:14px;font-weight:600;color:#111827;">캠페인별 성과</h4>
+                            <div class="sort-bar">
+                                <button class="sort-btn active" data-sort="spend" onclick="sortCampaigns('spend')">지출순</button>
+                                <button class="sort-btn" data-sort="roas" onclick="sortCampaigns('roas')">ROAS순</button>
+                                <button class="sort-btn" data-sort="revenue" onclick="sortCampaigns('revenue')">매출순</button>
+                            </div>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="data-table" id="campaignTable">
+                                <thead>
+                                    <tr>
+                                        <th>캠페인명</th>
+                                        <th style="text-align:right;">등급</th>
+                                        <th style="text-align:right;">지출</th>
+                                        <th style="text-align:right;">매출</th>
+                                        <th style="text-align:right;">ROAS</th>
+                                        <th style="text-align:right;">CPC</th>
+                                        <th style="text-align:right;">클릭</th>
+                                        <th style="text-align:right;">전환</th>
+                                        <th style="text-align:right;">전환율</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="campaignBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="dashEmpty" class="empty-state" style="display:none;">
+                        <p>조회할 데이터가 없습니다. 먼저 데이터를 업로드하세요.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Manage -->
+            <div id="tab-manage" class="tab-content">
+                <div class="section-card">
+                    <h3><img src="/static/img/icons/calendar.svg" alt="">저장된 데이터</h3>
+
+                    <div class="loading-spinner" id="manageLoading">
+                        <div class="spinner"></div>
+                        <p style="font-size:13px;color:#6b7280;">불러오는 중...</p>
+                    </div>
+
+                    <div id="dateList" class="date-list"></div>
+
+                    <div id="manageEmpty" class="empty-state" style="display:none;">
+                        <p>저장된 데이터가 없습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer style="background: #f8f9fa; border-top: 1px solid #e0e0e0; padding: 12px 20px; margin-top: 40px; font-size: 11px; color: #888; text-align: center; line-height: 1.6;">
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <p style="margin: 0 0 4px 0;"><span style="font-weight: 600; color: #555;">에이치코</span> ㅣ 대표: 정동환 ㅣ 사업자등록번호: 280-26-00396 ㅣ 통신판매업: 2023-경기하남-0304</p>
+                <p style="margin: 0 0 4px 0;">경기도 하남시 조정대로 45, F318 ㅣ 대표번호: 1566-3046 ㅣ E-mail: jdhwan227@naver.com</p>
+                <p style="margin: 0; color: #aaa;">&copy; 2025 에이치코. All rights reserved.</p>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+    // === State ===
+    let selectedType = 'general';
+    let trendChart = null;
+    let ctrChart = null;
+    let currentCampaigns = [];
+    let currentSort = 'spend';
+    let compareActive = false;
+    let rawData = [];
+    let selectedCampaigns = new Set();
+    let allCampaignNames = [];
+
+    // === Tab switching ===
+    document.querySelectorAll('.tab-nav button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-nav button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+
+            if (this.dataset.tab === 'dashboard') loadDashboard();
+            if (this.dataset.tab === 'manage') loadDateList();
+        });
+    });
+
+    // === Type selector ===
+    function selectType(type) {
+        selectedType = type;
+        document.querySelectorAll('.type-btn').forEach(b => {
+            b.classList.remove('active', 'coupang');
+            if (b.dataset.type === type) {
+                b.classList.add('active');
+                if (type === 'coupang') b.classList.add('coupang');
+            }
+        });
+    }
+
+    // === Upload ===
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) uploadFile(e.target.files[0]);
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragging');
+    });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragging'));
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragging');
+        if (e.dataTransfer.files.length > 0) uploadFile(e.dataTransfer.files[0]);
+    });
+
+    async function uploadFile(file) {
+        const loading = document.getElementById('uploadLoading');
+        const result = document.getElementById('uploadResult');
+        loading.classList.add('active');
+        result.className = 'upload-result';
+        result.style.display = 'none';
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('ad_type', selectedType);
+
+        try {
+            const resp = await fetch('/api/ad-analysis/accumulate', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                result.className = 'upload-result success';
+                result.textContent = data.message;
+                result.style.display = 'block';
+            } else {
+                result.className = 'upload-result error';
+                result.textContent = data.error || '업로드 실패';
+                result.style.display = 'block';
+            }
+        } catch (err) {
+            result.className = 'upload-result error';
+            result.textContent = '네트워크 오류: ' + err.message;
+            result.style.display = 'block';
+        } finally {
+            loading.classList.remove('active');
+            fileInput.value = '';
+        }
+    }
+
+    // === Dashboard ===
+    function initDateRange() {
+        const today = new Date();
+        const end = today.toISOString().split('T')[0];
+        const start = new Date(today);
+        start.setDate(start.getDate() - 30);
+        document.getElementById('startDate').value = start.toISOString().split('T')[0];
+        document.getElementById('endDate').value = end;
+    }
+    initDateRange();
+
+    async function loadDashboard() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const adType = document.getElementById('filterType').value;
+
+        const loading = document.getElementById('dashLoading');
+        const content = document.getElementById('dashContent');
+        const empty = document.getElementById('dashEmpty');
+
+        loading.classList.add('active');
+        content.style.display = 'none';
+        empty.style.display = 'none';
+
+        try {
+            const params = new URLSearchParams({ start_date: startDate, end_date: endDate, ad_type: adType });
+            const resp = await fetch('/api/ad-analysis/accumulated?' + params, { credentials: 'same-origin' });
+            const data = await resp.json();
+
+            if (!data.success || !data.data || data.data.length === 0) {
+                empty.style.display = 'block';
+                return;
+            }
+
+            content.style.display = 'block';
+
+            // Store raw data for client-side filtering
+            rawData = data.data;
+            allCampaignNames = [...new Set(rawData.map(r => r.campaign_name))].sort();
+            selectedCampaigns = new Set(allCampaignNames);
+            renderCampaignFilter();
+
+            renderKPI(data.kpi);
+            renderPerfSummary(data.kpi, data.campaigns, data.daily_trend);
+            renderChart(data.daily_trend);
+            renderCtrChart(data.daily_trend);
+            currentCampaigns = data.campaigns;
+            renderCampaigns(currentCampaigns);
+
+            // 기간 비교
+            if (compareActive) {
+                loadComparison(startDate, endDate, adType);
+            }
+
+        } catch (err) {
+            empty.style.display = 'block';
+            empty.querySelector('p').textContent = '데이터 로드 실패: ' + err.message;
+        } finally {
+            loading.classList.remove('active');
+        }
+    }
+
+    function renderKPI(kpi) {
+        const grid = document.getElementById('kpiGrid');
+        const items = [
+            { label: '총 지출', value: formatKRW(kpi.total_spend) },
+            { label: '총 매출', value: formatKRW(kpi.total_revenue) },
+            { label: 'ROAS', value: Math.round(kpi.roas * 100) + '%' },
+            { label: 'CTR', value: kpi.ctr.toFixed(2) + '%' },
+            { label: 'CPA', value: formatKRW(kpi.cpa) },
+            { label: '전환율', value: kpi.cvr.toFixed(2) + '%' },
+            { label: '클릭수', value: kpi.total_clicks.toLocaleString() },
+            { label: '전환수', value: kpi.total_conversions.toLocaleString() },
+        ];
+        grid.innerHTML = items.map(i => `
+            <div class="kpi-card">
+                <div class="kpi-label">${i.label}</div>
+                <div class="kpi-value">${i.value}</div>
+            </div>
+        `).join('');
+    }
+
+    // === Performance Summary (rule-based) ===
+    function renderPerfSummary(kpi, campaigns, dailyTrend) {
+        const list = document.getElementById('perfSummaryList');
+        const section = document.getElementById('perfSummary');
+        const items = [];
+
+        // 1) Overall ROAS assessment
+        if (kpi.roas >= 4) {
+            items.push('&#x2705; ROAS ' + Math.round(kpi.roas * 100) + '% &#8212; 전체 효율 우수');
+        } else if (kpi.roas >= 3.5) {
+            items.push('&#x26A0;&#xFE0F; ROAS ' + Math.round(kpi.roas * 100) + '% &#8212; 검토 필요');
+        } else if (kpi.roas >= 3) {
+            items.push('&#x2705; ROAS ' + Math.round(kpi.roas * 100) + '% &#8212; 전체 효율 보통');
+        } else {
+            items.push('&#x1F6A8; ROAS ' + Math.round(kpi.roas * 100) + '% &#8212; 효율 안좋음, 즉시 점검 필요');
+        }
+
+        // 2) Best campaign
+        if (campaigns && campaigns.length > 0) {
+            const sorted = [...campaigns].sort((a, b) => b.roas - a.roas);
+            const best = sorted[0];
+            if (best.roas > 0) {
+                items.push('&#x1F3C6; "' + best.campaign_name + '" 최고 효율 (ROAS ' + Math.round(best.roas * 100) + '%)');
+            }
+
+            // 3) Worst campaign (ROAS < 300%)
+            const worst = sorted.filter(c => c.roas < 3 && c.spend > 0);
+            if (worst.length > 0) {
+                const w = worst[worst.length - 1];
+                items.push('&#x26A0;&#xFE0F; "' + w.campaign_name + '" ROAS ' + Math.round(w.roas * 100) + '% &#8212; 개선 필요');
+            }
+
+            // 4) Spend concentration
+            const totalSpend = campaigns.reduce((s, c) => s + c.spend, 0);
+            if (totalSpend > 0 && campaigns.length >= 3) {
+                const top3Spend = sorted.slice(0, 3).reduce((s, c) => s + c.spend, 0);
+                // sort by spend for concentration
+                const spendSorted = [...campaigns].sort((a, b) => b.spend - a.spend);
+                const top3SpendConc = spendSorted.slice(0, 3).reduce((s, c) => s + c.spend, 0);
+                const pct = Math.round(top3SpendConc / totalSpend * 100);
+                items.push('&#x1F4B0; 광고비 상위 3개 캠페인이 전체의 ' + pct + '% 차지');
+            }
+        }
+
+        // 5) Trend (last 7 days vs earlier)
+        if (dailyTrend && dailyTrend.length >= 14) {
+            const half = Math.floor(dailyTrend.length / 2);
+            const recentRoas = dailyTrend.slice(half).reduce((s, d) => s + d.roas, 0) / (dailyTrend.length - half);
+            const earlierRoas = dailyTrend.slice(0, half).reduce((s, d) => s + d.roas, 0) / half;
+            if (earlierRoas > 0) {
+                const changePct = Math.round((recentRoas - earlierRoas) / earlierRoas * 100);
+                if (changePct > 0) {
+                    items.push('&#x1F4C8; 후반기 ROAS 상승 추세 (+' + changePct + '%)');
+                } else if (changePct < -5) {
+                    items.push('&#x1F4C9; 후반기 ROAS 하락 추세 (' + changePct + '%)');
+                }
+            }
+        } else if (dailyTrend && dailyTrend.length >= 4) {
+            const mid = Math.floor(dailyTrend.length / 2);
+            const recent = dailyTrend.slice(mid).reduce((s, d) => s + d.roas, 0) / (dailyTrend.length - mid);
+            const earlier = dailyTrend.slice(0, mid).reduce((s, d) => s + d.roas, 0) / mid;
+            if (earlier > 0) {
+                const changePct = Math.round((recent - earlier) / earlier * 100);
+                if (Math.abs(changePct) >= 5) {
+                    items.push(changePct > 0
+                        ? '&#x1F4C8; 최근 ROAS 상승 추세 (+' + changePct + '%)'
+                        : '&#x1F4C9; 최근 ROAS 하락 추세 (' + changePct + '%)');
+                }
+            }
+        }
+
+        if (items.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        list.innerHTML = items.map(i => '<li>' + i + '</li>').join('');
+    }
+
+    // === Chart: Spend / Revenue / ROAS ===
+    function renderChart(dailyTrend) {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        if (trendChart) trendChart.destroy();
+
+        const dates = dailyTrend.map(d => d.date);
+        const spendData = dailyTrend.map(d => d.spend);
+        const revenueData = dailyTrend.map(d => d.revenue);
+        const roasData = dailyTrend.map(d => d.roas);
+
+        trendChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: '지출',
+                        data: spendData,
+                        backgroundColor: 'rgba(99, 102, 241, 0.3)',
+                        borderColor: '#6366f1',
+                        borderWidth: 1,
+                        yAxisID: 'y',
+                        order: 2
+                    },
+                    {
+                        label: '매출',
+                        data: revenueData,
+                        backgroundColor: 'rgba(16, 185, 129, 0.3)',
+                        borderColor: '#10b981',
+                        borderWidth: 1,
+                        yAxisID: 'y',
+                        order: 3
+                    },
+                    {
+                        label: 'ROAS (%)',
+                        data: roasData.map(v => v * 100),
+                        type: 'line',
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        yAxisID: 'y1',
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'top', labels: { font: { size: 12 } } },
+                    title: { display: true, text: '일별 지출/매출/ROAS', font: { size: 13 }, padding: { bottom: 10 } }
+                },
+                scales: {
+                    y: { position: 'left', title: { display: true, text: '금액 (원)', font: { size: 11 } } },
+                    y1: { position: 'right', title: { display: true, text: 'ROAS (%)', font: { size: 11 } }, grid: { drawOnChartArea: false } }
+                }
+            }
+        });
+    }
+
+    // === Chart: CTR / CVR ===
+    function renderCtrChart(dailyTrend) {
+        const ctx = document.getElementById('ctrChart').getContext('2d');
+        if (ctrChart) ctrChart.destroy();
+
+        const dates = dailyTrend.map(d => d.date);
+        const ctrData = dailyTrend.map(d => d.ctr || 0);
+        const cvrData = dailyTrend.map(d => d.cvr || 0);
+
+        // 7-day moving average
+        function movingAvg(arr, window) {
+            return arr.map((_, i) => {
+                const start = Math.max(0, i - window + 1);
+                const slice = arr.slice(start, i + 1);
+                return Math.round(slice.reduce((s, v) => s + v, 0) / slice.length * 100) / 100;
+            });
+        }
+        const ctrMa = movingAvg(ctrData, 7);
+        const cvrMa = movingAvg(cvrData, 7);
+
+        ctrChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'CTR (%)',
+                        data: ctrData,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.08)',
+                        borderWidth: 1.5,
+                        pointRadius: 2,
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: 'CTR 7일 평균',
+                        data: ctrMa,
+                        borderColor: '#3b82f6',
+                        borderWidth: 2,
+                        borderDash: [5, 3],
+                        pointRadius: 0,
+                        fill: false
+                    },
+                    {
+                        label: '전환율 (%)',
+                        data: cvrData,
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.08)',
+                        borderWidth: 1.5,
+                        pointRadius: 2,
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: '전환율 7일 평균',
+                        data: cvrMa,
+                        borderColor: '#8b5cf6',
+                        borderWidth: 2,
+                        borderDash: [5, 3],
+                        pointRadius: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'top', labels: { font: { size: 11 } } },
+                    title: { display: true, text: '일별 CTR / 전환율 추세', font: { size: 13 }, padding: { bottom: 10 } }
+                },
+                scales: {
+                    y: { title: { display: true, text: '%', font: { size: 11 } }, beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // === Campaign table with grade, CPC, sort ===
+    function renderCampaigns(campaigns) {
+        const tbody = document.getElementById('campaignBody');
+        if (!campaigns || campaigns.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#9ca3af;">데이터 없음</td></tr>';
+            return;
+        }
+        tbody.innerHTML = campaigns.map(c => {
+            let gradeClass, gradeLabel;
+            if (c.roas >= 4) { gradeClass = 'excellent'; gradeLabel = '우수'; }
+            else if (c.roas >= 3.5) { gradeClass = 'warning'; gradeLabel = '검토필요'; }
+            else if (c.roas >= 3) { gradeClass = 'good'; gradeLabel = '보통'; }
+            else { gradeClass = 'poor'; gradeLabel = '효율 안좋음'; }
+
+            return `<tr>
+                <td>${c.campaign_name}</td>
+                <td class="num"><span class="grade-badge ${gradeClass}">${gradeLabel}</span></td>
+                <td class="num">${formatKRW(c.spend)}</td>
+                <td class="num">${formatKRW(c.revenue)}</td>
+                <td class="num" style="font-weight:600;color:${c.roas >= 4 ? '#059669' : c.roas >= 3.5 ? '#d97706' : c.roas >= 3 ? '#ea580c' : '#dc2626'}">${Math.round(c.roas * 100)}%</td>
+                <td class="num">${formatKRW(c.cpc || 0)}</td>
+                <td class="num">${c.clicks.toLocaleString()}</td>
+                <td class="num">${c.conversions.toLocaleString()}</td>
+                <td class="num">${(c.cvr || 0).toFixed(2)}%</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function sortCampaigns(key) {
+        currentSort = key;
+        document.querySelectorAll('.sort-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.sort === key);
+        });
+        const sorted = [...currentCampaigns].sort((a, b) => b[key] - a[key]);
+        renderCampaigns(sorted);
+    }
+
+    // === Campaign Filter ===
+    function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    function renderCampaignFilter() {
+        const section = document.getElementById('campaignFilterSection');
+        const container = document.getElementById('campaignCheckboxes');
+        if (allCampaignNames.length === 0) { section.style.display = 'none'; return; }
+        section.style.display = 'block';
+        container.innerHTML = allCampaignNames.map(name => {
+            const checked = selectedCampaigns.has(name) ? 'checked' : '';
+            const cls = selectedCampaigns.has(name) ? 'checked' : '';
+            return '<label class="campaign-checkbox-item ' + cls + '">'
+                + '<input type="checkbox" value="' + escapeHtml(name) + '" ' + checked + ' onchange="onCampaignToggle(this)">'
+                + '<span>' + escapeHtml(name) + '</span></label>';
+        }).join('');
+        updateFilterBadge();
+    }
+
+    function onCampaignToggle(cb) {
+        if (cb.checked) { selectedCampaigns.add(cb.value); }
+        else { selectedCampaigns.delete(cb.value); }
+        cb.closest('.campaign-checkbox-item').classList.toggle('checked', cb.checked);
+        updateFilterBadge();
+        applyFilter();
+    }
+
+    function toggleAllCampaigns(selectAll) {
+        if (selectAll) { selectedCampaigns = new Set(allCampaignNames); }
+        else { selectedCampaigns.clear(); }
+        renderCampaignFilter();
+        applyFilter();
+    }
+
+    function toggleFilterCollapse() {
+        const container = document.getElementById('campaignCheckboxes');
+        const btn = document.getElementById('filterToggleBtn');
+        container.classList.toggle('collapsed');
+        btn.textContent = container.classList.contains('collapsed') ? '펼치기' : '접기';
+    }
+
+    function updateFilterBadge() {
+        const badge = document.getElementById('filterBadge');
+        badge.textContent = selectedCampaigns.size + '/' + allCampaignNames.length + '개 선택';
+    }
+
+    // === Client-side Aggregation ===
+    function aggregateKPI(rows) {
+        const ts = rows.reduce((s, r) => s + (r.spend || 0), 0);
+        const tr = rows.reduce((s, r) => s + (r.revenue || 0), 0);
+        const tc = rows.reduce((s, r) => s + (r.clicks || 0), 0);
+        const tv = rows.reduce((s, r) => s + (r.conversions || 0), 0);
+        const ti = rows.reduce((s, r) => s + (r.impressions || 0), 0);
+        return {
+            total_spend: ts, total_revenue: tr, total_clicks: tc,
+            total_conversions: tv, total_impressions: ti,
+            roas: ts > 0 ? tr / ts : 0,
+            ctr: ti > 0 ? (tc / ti * 100) : 0,
+            cpa: tv > 0 ? ts / tv : 0,
+            cvr: tc > 0 ? (tv / tc * 100) : 0,
+        };
+    }
+
+    function aggregateDailyTrend(rows) {
+        const byDate = {};
+        rows.forEach(r => {
+            if (!byDate[r.date]) byDate[r.date] = { date: r.date, spend: 0, revenue: 0, clicks: 0, conversions: 0, impressions: 0 };
+            const d = byDate[r.date];
+            d.spend += (r.spend || 0); d.revenue += (r.revenue || 0);
+            d.clicks += (r.clicks || 0); d.conversions += (r.conversions || 0); d.impressions += (r.impressions || 0);
+        });
+        return Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date)).map(d => ({
+            ...d,
+            roas: d.spend > 0 ? d.revenue / d.spend : 0,
+            ctr: d.impressions > 0 ? (d.clicks / d.impressions * 100) : 0,
+            cvr: d.clicks > 0 ? (d.conversions / d.clicks * 100) : 0,
+        }));
+    }
+
+    function aggregateCampaigns(rows) {
+        const byC = {};
+        rows.forEach(r => {
+            const n = r.campaign_name;
+            if (!byC[n]) byC[n] = { campaign_name: n, spend: 0, revenue: 0, clicks: 0, conversions: 0, impressions: 0 };
+            const c = byC[n];
+            c.spend += (r.spend || 0); c.revenue += (r.revenue || 0);
+            c.clicks += (r.clicks || 0); c.conversions += (r.conversions || 0); c.impressions += (r.impressions || 0);
+        });
+        return Object.values(byC).map(c => ({
+            ...c,
+            roas: c.spend > 0 ? c.revenue / c.spend : 0,
+            ctr: c.impressions > 0 ? (c.clicks / c.impressions * 100) : 0,
+            cpa: c.conversions > 0 ? c.spend / c.conversions : 0,
+            cpc: c.clicks > 0 ? c.spend / c.clicks : 0,
+            cvr: c.clicks > 0 ? (c.conversions / c.clicks * 100) : 0,
+        })).sort((a, b) => b[currentSort] - a[currentSort]);
+    }
+
+    function applyFilter() {
+        const filtered = rawData.filter(r => selectedCampaigns.has(r.campaign_name));
+        if (filtered.length === 0) {
+            const empty = { total_spend: 0, total_revenue: 0, total_clicks: 0, total_conversions: 0, total_impressions: 0, roas: 0, ctr: 0, cpa: 0, cvr: 0 };
+            renderKPI(empty);
+            renderPerfSummary(empty, [], []);
+            renderChart([]);
+            renderCtrChart([]);
+            currentCampaigns = [];
+            renderCampaigns([]);
+            return;
+        }
+        const kpi = aggregateKPI(filtered);
+        const dailyTrend = aggregateDailyTrend(filtered);
+        const campaigns = aggregateCampaigns(filtered);
+        renderKPI(kpi);
+        renderPerfSummary(kpi, campaigns, dailyTrend);
+        renderChart(dailyTrend);
+        renderCtrChart(dailyTrend);
+        currentCampaigns = campaigns;
+        renderCampaigns(campaigns);
+    }
+
+    // === Period Comparison ===
+    function toggleCompare() {
+        compareActive = !compareActive;
+        const btn = document.getElementById('compareBtn');
+        const section = document.getElementById('compareSection');
+        if (compareActive) {
+            btn.textContent = '비교 해제';
+            btn.classList.remove('btn-outline');
+            btn.classList.add('btn-primary');
+            // trigger comparison if dashboard already loaded
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const adType = document.getElementById('filterType').value;
+            if (startDate && endDate) {
+                loadComparison(startDate, endDate, adType);
+            }
+        } else {
+            btn.textContent = '이전 기간 비교';
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline');
+            section.style.display = 'none';
+        }
+    }
+
+    async function loadComparison(startDate, endDate, adType) {
+        // Calculate previous period of same length
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        const prevEnd = new Date(start);
+        prevEnd.setDate(prevEnd.getDate() - 1);
+        const prevStart = new Date(prevEnd);
+        prevStart.setDate(prevStart.getDate() - diff);
+
+        const compareStart = prevStart.toISOString().split('T')[0];
+        const compareEnd = prevEnd.toISOString().split('T')[0];
+
+        try {
+            const params = new URLSearchParams({
+                start_date: startDate,
+                end_date: endDate,
+                compare_start: compareStart,
+                compare_end: compareEnd,
+                ad_type: adType
+            });
+            const resp = await fetch('/api/ad-analysis/accumulated/compare?' + params, { credentials: 'same-origin' });
+            const data = await resp.json();
+
+            if (!data.success) return;
+
+            renderComparison(data.changes, compareStart, compareEnd);
+        } catch (err) {
+            console.error('Compare error:', err);
+        }
+    }
+
+    function renderComparison(changes, compareStart, compareEnd) {
+        const section = document.getElementById('compareSection');
+        const grid = document.getElementById('compareGrid');
+        section.style.display = 'block';
+
+        const labels = {
+            roas: 'ROAS', ctr: 'CTR', cpa: 'CPA', cvr: '전환율',
+            cpc: 'CPC', total_spend: '지출', total_revenue: '매출'
+        };
+        const formatters = {
+            roas: v => Math.round(v * 100) + '%',
+            ctr: v => v.toFixed(2) + '%',
+            cpa: v => formatKRW(v),
+            cvr: v => v.toFixed(2) + '%',
+            cpc: v => formatKRW(v),
+            total_spend: v => formatKRW(v),
+            total_revenue: v => formatKRW(v)
+        };
+
+        const keys = ['roas', 'total_spend', 'total_revenue', 'ctr', 'cvr', 'cpa', 'cpc'];
+        grid.innerHTML = keys.map(key => {
+            const c = changes[key];
+            if (!c) return '';
+            const arrow = c.change_pct > 0 ? '&#x25B2;' : (c.change_pct < 0 ? '&#x25BC;' : '=');
+            const cls = c.trend === 'up' ? 'up' : (c.trend === 'down' ? 'down' : 'flat');
+            return `<div class="compare-card">
+                <div class="compare-label">${labels[key]}</div>
+                <div class="compare-value">${formatters[key](c.current)}</div>
+                <div class="compare-change ${cls}">${arrow} ${Math.abs(c.change_pct)}%</div>
+            </div>`;
+        }).join('');
+
+        // Update section title
+        section.querySelector('h4').innerHTML = '기간 비교 <span style="font-weight:400;font-size:12px;color:#6b7280;">(vs ' + compareStart + ' ~ ' + compareEnd + ')</span>';
+    }
+
+    // === Date list (manage tab) ===
+    async function loadDateList() {
+        const loading = document.getElementById('manageLoading');
+        const list = document.getElementById('dateList');
+        const empty = document.getElementById('manageEmpty');
+
+        loading.classList.add('active');
+        list.innerHTML = '';
+        empty.style.display = 'none';
+
+        try {
+            const resp = await fetch('/api/ad-analysis/accumulated/dates', { credentials: 'same-origin' });
+            const data = await resp.json();
+
+            if (!data.success || !data.dates || data.dates.length === 0) {
+                empty.style.display = 'block';
+                return;
+            }
+
+            list.innerHTML = data.dates.map(d => `
+                <div class="date-item">
+                    <div class="date-info">
+                        <span class="date-label">${d.date}</span>
+                        <span class="type-badge ${d.ad_type}">${d.ad_type === 'coupang' ? '쿠팡' : '일반'}</span>
+                        <span class="date-meta">${d.count}개 캠페인 / 지출 ${formatKRW(d.total_spend)}</span>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="deleteDate('${d.date}', '${d.ad_type}')">삭제</button>
+                </div>
+            `).join('');
+
+        } catch (err) {
+            empty.style.display = 'block';
+            empty.querySelector('p').textContent = '로드 실패: ' + err.message;
+        } finally {
+            loading.classList.remove('active');
+        }
+    }
+
+    async function deleteDate(date, adType) {
+        if (!confirm(`${date} (${adType === 'coupang' ? '쿠팡' : '일반'}) 데이터를 삭제하시겠습니까?`)) return;
+
+        try {
+            const params = new URLSearchParams({ date: date, ad_type: adType });
+            const resp = await fetch('/api/ad-analysis/accumulated?' + params, {
+                method: 'DELETE',
+                credentials: 'same-origin'
+            });
+            const data = await resp.json();
+            if (data.success) {
+                loadDateList();
+            } else {
+                alert('삭제 실패: ' + (data.error || ''));
+            }
+        } catch (err) {
+            alert('삭제 오류: ' + err.message);
+        }
+    }
+
+    // === Helpers ===
+    function formatKRW(num) {
+        if (!num && num !== 0) return '-';
+        num = Math.round(num);
+        if (num >= 100000000) return (num / 100000000).toFixed(1) + '억';
+        if (num >= 10000) return (num / 10000).toFixed(0) + '만';
+        return num.toLocaleString() + '원';
+    }
+
+    // === Active menu ===
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.menu-item').forEach(item => {
+        if (item.getAttribute('href') === currentPath) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+
+    // === Mobile sidebar ===
+    const mobileToggle = document.getElementById('mobileToggle');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function toggleSidebar() {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('active');
+        mobileToggle.textContent = sidebar.classList.contains('open') ? '\u2715' : '\u2630';
+    }
+
+    mobileToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', toggleSidebar);
+
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.remove('active');
+                mobileToggle.textContent = '\u2630';
+            }
+        });
+    });
+    </script>
+</body>
+</html>

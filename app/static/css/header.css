@@ -1,4 +1,4 @@
-/* Header Styles - 마케팅광장 광고분석 대시보드 */
+/* Header Styles - 모던 미니멀 */
 
 .top-header {
     position: fixed;
@@ -7,32 +7,32 @@
     right: 0;
     width: 100%;
     height: 56.5px;
-    background: #fff;
-    border-bottom: 1px solid #e4e4e4;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 45px;
+    padding: 0 32px;
     z-index: 100;
-    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.05);
 }
 
 /* Logo and Title */
 .header-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .logo-text {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
-    color: #1b2a41;
+    color: #111827;
+    letter-spacing: -0.01em;
 }
 
 .logo-subtitle {
     font-size: 12px;
-    color: #9e9e9e;
+    color: #9ca3af;
     font-weight: 400;
 }
 
@@ -40,44 +40,49 @@
 .header-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .header-btn {
-    padding: 8px 16px;
-    background: #1b2a41;
-    border: 1px solid #1b2a41;
-    border-radius: 5px;
+    padding: 7px 14px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 13px;
-    font-weight: 600;
-    color: #fff;
+    font-weight: 500;
+    color: #374151;
     text-decoration: none;
-    transition: all 0.18s;
+    transition: all 0.15s ease;
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
 
 .header-btn:hover {
-    background: #2a3f5f;
-    border-color: #2a3f5f;
+    background: #f9fafb;
+    border-color: #9ca3af;
 }
 
-/* User Info (Simplified - No Dropdown) */
+.header-btn img {
+    filter: none !important;
+    opacity: 0.6;
+}
+
+/* User Info */
 .user-info {
     display: flex;
     align-items: center;
-    padding: 8px 16px;
-    background: #f8f8f8;
-    border: 1px solid #e4e4e4;
-    border-radius: 5px;
+    padding: 7px 14px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
 }
 
 .user-nickname {
     font-size: 13px;
-    font-weight: 600;
-    color: #333;
+    font-weight: 500;
+    color: #374151;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -93,7 +98,7 @@
 @media (max-width: 768px) {
     .top-header {
         left: 0;
-        padding: 0 8px 0 52px; /* 왼쪽에 토글 버튼 공간 확보 */
+        padding: 0 8px 0 52px;
         height: 50px;
     }
 
@@ -120,7 +125,6 @@
         white-space: nowrap;
     }
 
-    /* 버튼 텍스트 숨기고 아이콘만 표시 */
     .header-btn .btn-text {
         display: none;
     }
@@ -144,7 +148,6 @@
         font-size: 10px;
     }
 
-    /* 극소형 화면에서는 하나의 버튼만 표시 */
     .header-btn:not(:first-child) {
         display: none;
     }
