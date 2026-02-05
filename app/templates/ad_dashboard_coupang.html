@@ -2517,8 +2517,47 @@
             }
         }
 
+        // 저장 중 상태 플래그
+        let isSaving = false;
+
+        // 페이지 이탈 방지
+        window.addEventListener('beforeunload', function(e) {
+            if (isSaving) {
+                e.preventDefault();
+                e.returnValue = '저장 중입니다. 페이지를 떠나시겠습니까?';
+                return e.returnValue;
+            }
+        });
+
+        // 로딩 오버레이 표시/숨김
+        function showSavingOverlay(show, message = '저장 중...') {
+            let overlay = document.getElementById('savingOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'savingOverlay';
+                overlay.innerHTML = `
+                    <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;">
+                        <div style="background:white;padding:40px 60px;border-radius:12px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                            <div style="width:50px;height:50px;border:4px solid #f3f3f3;border-top:4px solid #3498db;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px;"></div>
+                            <div id="savingMessage" style="font-size:18px;font-weight:600;color:#333;"></div>
+                            <div style="font-size:14px;color:#666;margin-top:10px;">페이지를 이동하지 마세요</div>
+                        </div>
+                    </div>
+                    <style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style>
+                `;
+                document.body.appendChild(overlay);
+            }
+            document.getElementById('savingMessage').textContent = message;
+            overlay.style.display = show ? 'block' : 'none';
+        }
+
         // 누적 저장: 쿠팡 데이터를 서버 DB에 저장
         async function saveToServerCoupang() {
+            if (isSaving) {
+                alert('이미 저장 중입니다. 잠시 기다려주세요.');
+                return;
+            }
+
             if (!globalData || globalData.length === 0) {
                 alert('저장할 데이터가 없습니다. 먼저 파일을 업로드하세요.');
                 return;
@@ -2532,9 +2571,11 @@
                 alert('날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식으로 입력하세요.');
                 return;
             }
+
+            // 캠페인명 우선, 없으면 키워드 사용 (종합대시보드용)
             const converted = globalData.map(row => ({
                 date: inputDate,
-                campaign_name: row['키워드'] || '',
+                campaign_name: row['캠페인명'] || row['키워드'] || '',
                 spend: parseFloat(row['광고비'] || 0),
                 impressions: parseInt(row['노출수'] || 0),
                 clicks: parseInt(row['클릭수'] || 0),
@@ -2546,6 +2587,10 @@
                 alert('변환 가능한 데이터가 없습니다.');
                 return;
             }
+
+            // 저장 시작
+            isSaving = true;
+            showSavingOverlay(true, `${converted.length}건 저장 중...`);
 
             try {
                 const resp = await fetch('/api/ad-analysis/accumulate-json', {
@@ -2566,6 +2611,9 @@
             } catch (err) {
                 console.error('Server save failed:', err);
                 alert('[오류] 서버 연결 실패: ' + err.message);
+            } finally {
+                isSaving = false;
+                showSavingOverlay(false);
             }
         }
     </script>
