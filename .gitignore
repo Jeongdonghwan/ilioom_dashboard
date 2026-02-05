@@ -146,8 +146,12 @@ flask_session/*
 
 # 데이터베이스 백업
 backups/*
-*.sql
 *.dump
+
+# SQL 파일 (database/ 폴더는 허용)
+*.sql
+!database/**/*.sql
+!database/*.sql
 
 # Excel/CSV 임시 파일
 *.xlsx#
