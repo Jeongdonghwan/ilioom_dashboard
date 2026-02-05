@@ -3,6 +3,10 @@
 
 import os
 import multiprocessing
+from dotenv import load_dotenv
+
+# .env 파일 로드 (systemd 환경에서 환경변수 자동 설정)
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
 
 # ========================================
 # Server Socket

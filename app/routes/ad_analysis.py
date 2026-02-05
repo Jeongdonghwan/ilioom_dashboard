@@ -650,7 +650,8 @@ def upload_coupang():
 
         # 🔥 키워드 중복 제거 - 동일 키워드는 데이터 합산
         if '키워드' in df.columns:
-            keyword_groups = df.groupby('키워드', as_index=False).agg({
+            # aggregation 딕셔너리 구성
+            agg_dict = {
                 '노출수': 'sum',
                 '클릭수': 'sum',
                 '광고비': 'sum',
@@ -658,7 +659,12 @@ def upload_coupang():
                 '총 판매수량': 'sum',
                 '총 전환매출액': 'sum',
                 '광고 노출 지면': 'first',  # 첫 번째 값 사용
-            })
+            }
+            # 캠페인명 컬럼이 있으면 포함 (종합대시보드용)
+            if '캠페인명' in df.columns:
+                agg_dict['캠페인명'] = 'first'
+
+            keyword_groups = df.groupby('키워드', as_index=False).agg(agg_dict)
 
             # 클릭률 재계산 (Infinity 방지)
             keyword_groups['클릭률'] = (keyword_groups['클릭수'] / keyword_groups['노출수'] * 100).replace([np.inf, -np.inf], 0).fillna(0)
@@ -2016,6 +2022,8 @@ def accumulate_data():
                 name_col = '키워드'
             else:
                 return jsonify({'success': False, 'error': '캠페인명 또는 키워드 컬럼이 필요합니다'}), 400
+
+            logger.info(f'[COUPANG DEBUG] name_col={name_col}, columns={list(df.columns)[:10]}')
 
             # 날짜 처리: 파일명에서 추출 시도, 없으면 오늘 날짜
             upload_date = _extract_date_from_filename(file.filename)
