@@ -2572,25 +2572,46 @@
                 return;
             }
 
-            // 캠페인명 우선, 없으면 키워드 사용 (종합대시보드용)
-            const converted = globalData.map(row => ({
+            // 캠페인명별로 데이터 합산 (종합대시보드용)
+            // 같은 캠페인 내 여러 키워드 데이터를 캠페인 단위로 집계
+            const campaignGrouped = {};
+            globalData.forEach(row => {
+                const campaignName = (row['캠페인명'] || row['키워드'] || '').trim();
+                if (!campaignName || campaignName === 'nan') return;
+
+                if (!campaignGrouped[campaignName]) {
+                    campaignGrouped[campaignName] = {
+                        spend: 0, impressions: 0, clicks: 0, conversions: 0, revenue: 0
+                    };
+                }
+                campaignGrouped[campaignName].spend += parseFloat(row['광고비'] || 0);
+                campaignGrouped[campaignName].impressions += parseInt(row['노출수'] || 0);
+                campaignGrouped[campaignName].clicks += parseInt(row['클릭수'] || 0);
+                campaignGrouped[campaignName].conversions += parseInt(row['총 주문수'] || row['총 주문수(14일)'] || row['총 주문수(1일)'] || 0);
+                campaignGrouped[campaignName].revenue += parseFloat(row['총 전환매출액'] || row['총 전환매출액(14일)'] || row['총 전환매출액(1일)'] || 0);
+            });
+
+            const converted = Object.keys(campaignGrouped).map(name => ({
                 date: inputDate,
-                campaign_name: row['캠페인명'] || row['키워드'] || '',
-                spend: parseFloat(row['광고비'] || 0),
-                impressions: parseInt(row['노출수'] || 0),
-                clicks: parseInt(row['클릭수'] || 0),
-                conversions: parseInt(row['총 주문수'] || row['총 주문수(14일)'] || row['총 주문수(1일)'] || 0),
-                revenue: parseFloat(row['총 전환매출액'] || row['총 전환매출액(14일)'] || row['총 전환매출액(1일)'] || 0)
-            })).filter(r => r.campaign_name && r.campaign_name !== 'nan');
+                campaign_name: name,
+                spend: campaignGrouped[name].spend,
+                impressions: campaignGrouped[name].impressions,
+                clicks: campaignGrouped[name].clicks,
+                conversions: campaignGrouped[name].conversions,
+                revenue: campaignGrouped[name].revenue
+            }));
 
             if (converted.length === 0) {
                 alert('변환 가능한 데이터가 없습니다.');
                 return;
             }
 
+            console.log(`캠페인 ${converted.length}개로 집계됨 (원본 ${globalData.length}개 키워드)`);
+            console.log('샘플 캠페인:', converted.slice(0, 3));
+
             // 저장 시작
             isSaving = true;
-            showSavingOverlay(true, `${converted.length}건 저장 중...`);
+            showSavingOverlay(true, `캠페인 ${converted.length}개 저장 중...`);
 
             try {
                 const resp = await fetch('/api/ad-analysis/accumulate-json', {
