@@ -2587,7 +2587,7 @@
                 campaignGrouped[campaignName].spend += parseFloat(row['광고비'] || 0);
                 campaignGrouped[campaignName].impressions += parseInt(row['노출수'] || 0);
                 campaignGrouped[campaignName].clicks += parseInt(row['클릭수'] || 0);
-                campaignGrouped[campaignName].conversions += parseInt(row['총 주문수'] || row['총 주문수(14일)'] || row['총 주문수(1일)'] || 0);
+                campaignGrouped[campaignName].conversions += parseInt(row['총 판매수량'] || row['총 판매수량(14일)'] || row['총 판매수량(1일)'] || 0);
                 campaignGrouped[campaignName].revenue += parseFloat(row['총 전환매출액'] || row['총 전환매출액(14일)'] || row['총 전환매출액(1일)'] || 0);
             });
 
@@ -2606,8 +2606,12 @@
                 return;
             }
 
+            // 저장 전 총합 검증
+            const totalRevenue = converted.reduce((s, r) => s + r.revenue, 0);
+            const totalSpend = converted.reduce((s, r) => s + r.spend, 0);
+            const totalConversions = converted.reduce((s, r) => s + r.conversions, 0);
             console.log(`캠페인 ${converted.length}개로 집계됨 (원본 ${globalData.length}개 키워드)`);
-            console.log('샘플 캠페인:', converted.slice(0, 3));
+            console.log(`저장 총합 - 매출: ${totalRevenue.toLocaleString()}, 광고비: ${totalSpend.toLocaleString()}, 전환: ${totalConversions}`);
 
             // 저장 시작
             isSaving = true;
@@ -2625,7 +2629,7 @@
                 });
                 const result = await resp.json();
                 if (result.success) {
-                    alert('[완료] DB 저장 완료: ' + result.message);
+                    alert(`[완료] DB 저장 완료: ${result.message}\n매출 합계: ${totalRevenue.toLocaleString()}원 | 전환: ${totalConversions}건`);
                 } else {
                     alert('[오류] 저장 실패: ' + (result.error || ''));
                 }

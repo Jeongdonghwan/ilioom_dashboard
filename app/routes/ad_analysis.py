@@ -577,6 +577,7 @@ def upload_coupang():
                 # 비검색영역 지표 합산
                 non_search_aggregated = {
                     '키워드': '비검색영역 (통합)',
+                    '캠페인명': '비검색영역 (통합)',
                     '광고 노출 지면': '비검색영역 (통합)',
                     '노출수': non_search_df['노출수'].sum(),
                     '클릭수': non_search_df['클릭수'].sum(),
@@ -612,6 +613,7 @@ def upload_coupang():
                 # 리타겟팅 지표 합산
                 retargeting_aggregated = {
                     '키워드': '리타겟팅 (통합)',
+                    '캠페인명': '리타겟팅 (통합)',
                     '광고 노출 지면': '리타겟팅 (통합)',
                     '노출수': retargeting_df['노출수'].sum(),
                     '클릭수': retargeting_df['클릭수'].sum(),
@@ -701,8 +703,11 @@ def upload_coupang():
 
         logger.info(f'Processed {len(df)} valid keywords')
 
-        # 요약 지표 계산
+        # 요약 지표 계산 (총합 검증용 로깅 포함)
         total_spend = df['광고비'].sum()
+        total_quantity = int(df['총 판매수량'].sum()) if '총 판매수량' in df.columns else 0
+        total_orders = int(df['총 주문수'].sum()) if '총 주문수' in df.columns else 0
+        logger.info(f'Coupang totals: spend={total_spend:.0f}, revenue={df["총 전환매출액"].sum():.0f}, orders={total_orders}, quantity={total_quantity}')
         total_revenue = df['총 전환매출액'].sum()
 
         # 평균CTR 계산 (Infinity 방지)
